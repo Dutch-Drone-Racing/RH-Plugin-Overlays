@@ -3,11 +3,11 @@
     "author": "Dutch Drone Racing",
     "author_uri": "https://dutchdroneracing.com",
     "description": "Adds customized overlays.",
-    "info_uri": "https://github.com/FPVScores/FPVScores/",
+    "info_uri": "https://github.com/Dutch-Drone-Racing/RH-Plugin-StreamOverlays/",
     "license": "DDR",
     "license_uri": "https://github.com/RotorHazard/RotorHazard/blob/main/LICENSE",
     "version": "1.0",
-    "required_rhapi_version": "1.0",
+    "required_rhapi_version": "1.2",
     "update_uri": null,
     "text_domain": null
 }
