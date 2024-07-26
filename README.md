@@ -2,8 +2,8 @@
 # DDR Overlays
 Stream overlays for RotorHazard as a plugin. These are used and made by Dutch Drone Racing but totally free to use.
 
->> [!IMPORTANT]
->> This plugin is still a work in progress. The code should be cleaned and a few more overlays should be added. Feel free to help!
+> [!IMPORTANT]
+> This plugin is still a work in progress. The code should be cleaned and a few more overlays should be added. Feel free to help!
 
 ## Overlays
 - Single Pilot Node
