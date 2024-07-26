@@ -1,0 +1,655 @@
+/* General */
+
+h1, h2, h3, h4, h5 {
+    font-family: teko, Arial, Helvetica, sans-serif;
+}
+
+
+
+/* DDR NEXT UP */
+
+#ddr_nextup {
+    background-color: #000000DC;
+    border-radius: 16px;
+    color: #fff;
+}
+
+#ddr_nextup #nextup_title {
+    font-size: 56px;
+    font-weight: 800;
+    /*color: #013e77;*/
+    padding: 20px 0 0 0;
+    text-align: center;
+    font-family: teko, Arial, Helvetica, sans-serif;
+    text-transform: uppercase;
+}
+
+#ddr_nextup .curr_heat_title {
+    font-family: teko, Arial, Helvetica, sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+#ddr_nextup #title {
+    font-size: 42px;
+    font-weight: 400;
+    padding: 12px 0 42px 0;
+    text-align: center;
+}
+
+#ddr_nextup .curr_event_name {
+    font-family: teko, Arial, Helvetica, sans-serif;
+}
+
+#ddr_nextup #nextup_pilot_box {
+    width: 1400px;
+    height: 440px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+
+#ddr_nextup .nextup_pilot {
+    /*min-width: 300px;*/
+    height: 600px;
+    flex: 1 0 calc(16% - 24px);
+    margin: 0 12px;
+}
+
+
+#ddr_nextup .nextup_pilot_avatar {
+    width: 100%;
+    height: 220px;
+}
+
+#ddr_nextup .nextup_pilot_avatar_mask {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background-color: #b9b9b9;
+    margin: 12px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+#ddr_nextup .nextup_pilot_avatar_mask img {
+    width: 100%;
+    height: 100%;
+}
+
+#ddr_nextup .nextup_pilot_name {
+    width: 100%;
+    text-align: center;
+    font-size: 46px;
+    padding-top: 8px;
+    font-family: teko, Arial, Helvetica, sans-serif;
+}
+
+#ddr_nextup .nextup_pilot_flag {
+    width: 100%;
+    text-align: center;
+    padding-top: 16px;
+}
+
+#ddr_nextup .nextup_pilot_flag_mask {
+    width: 48px;
+    height: 32px;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: #000;
+    margin: 0 auto;
+    display: block;
+    text-align: center;
+}
+
+#ddr_nextup .nextup_pilot_flag_mask img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* END OF DDR NEXT UP */
+
+
+
+
+
+/* DDR NODE */
+
+#ddr_node #node_info_bar {
+    background-color: #000000DC;
+    width: 100%;
+    height: 60px;
+    color: white;
+    border-bottom: 12px solid #006cff;
+    position: absolute;
+    bottom: 0px;
+}
+
+#ddr_node #node_avatar {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background-color: #b9b9b9;
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    z-index: 999;
+    overflow: hidden;
+}
+
+#ddr_node #node_avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#ddr_node #node_avatar_spacer {
+    width: 150px;
+    height: 60px;
+    float: left;
+}
+
+#ddr_node #node_info_bar div {
+    float: left;
+    height: 60px;
+    padding: 0 12px;
+    
+    font-size: 28px;
+}
+
+#ddr_node #node_info_bar #node_flag {
+    width: 42px;
+    height: 24px;
+    font-size: 24px;
+    font-weight: 200;
+    padding: 16px 0 0 0;
+}
+
+#ddr_node #node_info_bar #node_flag img {
+    width: 100%;
+    height: 100%;
+    float: left;
+    margin-right: 12px;
+    box-shadow: 0 0 0px 2px #fff;
+
+}
+
+#ddr_node #node_info_bar #node_race_stats{
+    float: right;
+    margin-right: 140px;
+}
+
+#ddr_node #node_info_bar #node_race_stats #node_rank_stat {
+    font-size: 40px!important;
+    line-height: 1;
+    padding-top: 10px;
+}
+
+
+#ddr_node #node_info_bar #node_callsign {
+    font-size: 40px;
+    font-weight: 200;
+    padding: 14px 0 0 12px;
+    font-family: teko, Arial, Helvetica, sans-serif;
+    text-transform: none;
+    line-height: 1;
+}
+
+#ddr_node #node_race_stats {
+
+}
+
+#ddr_node #node_position_spacer {
+    width: 150px;
+    height: 60px;
+}
+
+#ddr_node #node_position {
+    width: 140px;
+    height: 140px;
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    background-color: #006cff;
+    z-index: 999;
+    border-radius: 50%;
+}
+
+#ddr_node #node_position #node_pos {
+    font-size: 112px;
+    color: #fff;
+    text-align: center;
+    padding-top: calc(50% - 40px);
+    font-family: teko, Arial, Helvetica, sans-serif;
+    line-height: 1;
+    font-weight: 600;
+}
+
+#ddr_node #node_position #node_pos sup {
+    font-size: 34px;
+}
+
+#ddr_node #pilot_current_laps {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    /*display: none;*/
+    font-size: 32px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 0 4px #000;
+}
+
+#ddr_node #pilot_current_lap_text {
+    position: absolute;
+    width: 100%;
+    height: 60px;
+    bottom: 0px;
+    text-align: center;
+    font-size: 40px;
+    line-height: 1;
+    padding: 0;
+    color: #fff;
+    font-family: teko, Arial, Helvetica, sans-serif;
+
+}
+
+/* END OF DDR NODE */
+
+
+
+/* DDR BAR */
+
+#ddr_frame_topbar_main {
+    padding: 0;
+    margin: 0;
+}
+
+#ddr_frame_topbar {
+    font-family: Teko, Arial, Helvetica, sans-serif;
+    /*background-color: blue;*/
+}
+
+#ddr_frame_topbar #timer {
+    width: 300px;
+    font-size: 18em;
+    margin-left: 0px;
+    margin: 10px;
+}
+
+#ddr_frame_topbar .timing-clock {
+    line-height: normal;
+    background-color: #0000007d;
+    font-size: 28px;
+    height: 26px;
+    padding-top: 16px;
+    margin-top: 8px;
+    width: 140px;
+    font-family: 'Courier New', Courier, monospace;
+    text-transform: uppercase;
+    font-style: italic;
+
+}
+
+#ddr_frame_topbar .race-running .timing-clock {
+    background-color: #0000007d;
+    color: greenyellow;
+}
+
+#ddr_frame_topbar .race-stopped .timing-clock {
+    background-color: #00000000;
+    color: red;
+    background-color: #4f000052;
+}
+
+#ddr_frame_topbar .timing-clock.staging {
+    background-color: #00000000;
+    color: orange;
+    background-color: rgba(93, 60, 0, 0.701);
+
+}
+
+#ddr_frame_topbar #block_center {
+    float: left;
+    width: calc(100vw - 320px);
+}
+
+#ddr_frame_topbar {
+    width: 1920px;
+    /*background-color: #101010;*/
+    box-shadow: 0px 4px 2px #000000;
+    background: linear-gradient(to bottom,  #000000ed 0%,#101010ed 40%,#101010ed 61%,#000000ed 100%);
+}
+
+#ddr_frame_topbar #block_left, #ddr_frame_topbar #block_right {
+    float: left;
+    height: 76px;
+    #background-color: #b50808;
+    width: 160px;
+}
+
+#ddr_frame_topbar #heatTitle {
+    width: 100%;
+    color: #fff;
+    text-align: left;
+    font-size: 42px;
+    font-weight: 200;
+    padding-top: 14px;
+    margin-left: 14px;
+    font-style: italic;
+}
+
+
+#ddr_frame_topbar #firstplace {
+    color: #fff;
+    text-align: center;
+    font-size: 28px;
+    padding-top: 18px;
+}
+
+#ddr_frame_topbar #firstplace img {
+    display: inline-block;
+    height: 20px;
+    margin-right: 8px;
+    padding-top: 8px;
+    filter: invert(100%) sepia(17%) saturate(7479%) hue-rotate(183deg) brightness(118%) contrast(100%);
+}
+
+#ddr_frame_topbar .curr_heat_Title {
+    font-weight: 500;
+}
+
+#ddr_frame_topbar #event_Title {
+    font-weight: 200;
+    font-size: 32px;
+}
+
+
+
+/* END OF DDR BAR */
+
+
+
+
+/* FAI LEADERBOARD32 */
+
+#ddr_leaderboard32.leaderboard_fs {
+    margin: 0;
+    padding: 0;
+    display: block;
+    width: 100vw;
+}
+
+#ddr_leaderboard32.leaderboard_fs .leaderboard_fai_page {
+    display: block;
+    width: calc(25% - 20px);
+    height: auto;
+    float: left;
+    overflow: hidden;
+    margin: 0 10px;
+}
+
+#ddr_leaderboard32.leaderboard_fs .leaderboard_fai_page thead tr {
+    height: 10px!important;
+    overflow: hidden;
+}
+
+#ddr_leaderboard32.leaderboard_fs .leaderboard_fai_page thead th {
+    height: 10px!important;
+    overflow: hidden;
+}
+
+#ddr_leaderboard32.leaderboard_fs .leaderboard_fai_page tr {
+    height: calc( calc(100vh - 40px) / 8);
+    overflow: hidden;
+}
+
+
+#ddr_leaderboard32 .avatar {
+    width: 64px;
+    height: 64px;
+}
+
+#ddr_leaderboard32 .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#ddr_leaderboard32 .leaderboard_fai_page {
+    display: none;
+}
+
+#ddr_leaderboard32 .leaderboard_fai_page.active {
+    display: block;
+}
+
+#ddr_leaderboard32 td, #ddr_leaderboard32 th {
+    border: 0px;
+    font-size: 36px;
+}
+
+#ddr_leaderboard32 .flag {
+    width: 46px;
+    height: 30px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0 0;
+    margin-top: 18px;
+    display: block;
+    text-align: left;
+    float: left;;
+}
+
+#ddr_leaderboard32 .flag img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#ddr_leaderboard32 td.pos {
+    font-size: 48px;
+    font-weight: 800;
+    padding-top: 24px;
+    width: 40px;
+
+}
+
+#ddr_leaderboard32 td.source {
+   width: 260px;
+}
+
+#ddr_leaderboard32 td.pilot {
+    width: 260px;
+ }
+
+#ddr_leaderboard32 #leaderboard_pagination {
+    font-size: 46px;
+    padding: 12px 0;
+    text-align: center;;
+}
+
+#ddr_leaderboard32 .source, #ddr_leaderboard32 td.source {
+    display: none;
+}
+
+#ddr_leaderboard32.leaderboard_fs td, #ddr_leaderboard32.leaderboard_fs th {
+    font-size: 20px;
+}
+
+#ddr_leaderboard32.leaderboard_fs td.pos{
+    font-size: 28px;
+    padding-top: 6px;
+}
+
+#ddr_leaderboard32.leaderboard_fs td.avatar {
+    width: 48px;
+    height: 100%;
+}
+
+#ddr_leaderboard32.leaderboard_fs td.avatar img {
+    height: 32px;
+    width: 32px;
+}
+
+#ddr_leaderboard32.leaderboard_fs td {
+    height: 100%;
+}
+
+#ddr_leaderboard32.leaderboard_fs .flag {
+    width: auto;
+}
+
+#ddr_leaderboard32.leaderboard_fs .flag img {
+    height: 12px;
+    width: 16px;
+    padding-top: 24px;
+}
+
+/* END OF DDR LEADERBOARD32 */
+
+
+
+
+/* FAI BRACKETS */
+
+#fai_brackets {
+    padding: 40px;
+}
+
+.bracket_group:nth-child(2) {
+    margin-top: 120px;
+}
+
+.bracket_group_title {
+    font-size: 32px;
+    margin-bottom: 20px;
+    width: 100vw;
+    display: block;
+}
+
+.bracket_group_content {
+    display: flex;
+}
+
+.bracket_race {
+    width: 200px;
+    min-height: 100px;
+    border: 1px solid #013e77;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    background-color: #fff;
+}
+
+.bracket_race_title {
+    font-size: 22px;
+    font-weight: 200;
+    padding: 4px;
+    text-align: center;
+    background-color: #013e77;
+    color: #fff;
+}
+
+.bracket_race_pilot {
+    border-top: 1px solid #013e77;
+    padding: 5px 12px;
+    font-size: 18px;
+    line-height: 1;
+    height: 28px;
+}
+
+.bracket_race_pilot div {
+    float: left;
+}
+
+.bracket_race_pilot .avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 16px;
+    overflow: hidden;
+    margin: 2px 6px 2px 0px;
+}
+
+.bracket_race_pilot .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.bracket_race_pilot .flag {
+    width: 24px;
+    height: 15px;
+    margin-top: 4px;
+    overflow: hidden;
+    margin: 6px 6px 0px 0px;
+}
+
+.bracket_race_pilot .flag img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.bracket_race_pilot .pilot_name {
+    font-size: 20px;
+    font-weight: 200;
+    padding-top: 5px;
+}
+
+.bracket_race_pilot .no_pilot {
+    font-size: 18px;
+    font-weight: 200;
+    padding-top: 6px;
+    color: #6c6c6c;
+}
+
+.bracket_column {
+    float: left;
+    margin-right: 80px;
+}
+
+#bracket_column_0 {
+    float: left;
+    margin-right: 20px;
+}
+
+.bracket_column:nth-child(2) {
+    /*margin-top: 100px;*/
+}
+
+.bracket_column:nth-child(3) .bracket_race {
+    margin-top: 4px;
+}
+
+.bracket_column:nth-child(3) .bracket_race:nth-child(1) {
+    margin-top: 4px;
+}
+
+.bracket_group:nth-child(2) .bracket_column:nth-child(2) .bracket_race {
+    margin-top: 0;
+}
+
+
+.bracket_group .bracket_column:nth-child(4) .bracket_race {
+    margin-top: 150px;
+}
+.bracket_group .bracket_column:nth-child(4) .bracket_race:nth-child(2) {
+    margin-top: 200px;
+}
+
+.bracket_group:nth-child(2) .bracket_column:nth-child(3) .bracket_race, .bracket_group:nth-child(2) .bracket_column:nth-child(4) .bracket_race {
+    margin-top: 140px;
+}
+
+.bracket_group:nth-child(2) .bracket_column:nth-child(5) .bracket_race:nth-child(1), .bracket_group:nth-child(2) .bracket_column:nth-child(6) .bracket_race:nth-child(1) {
+    margin-top: 320px;
+}
+
+.bracket_group .bracket_column:nth-child(5) .bracket_race, .bracket_group .bracket_column:nth-child(6) .bracket_race {
+    margin-top: 340px;
+}
+

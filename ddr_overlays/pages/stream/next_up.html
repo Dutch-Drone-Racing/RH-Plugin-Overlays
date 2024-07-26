@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="RotorHazard">
+	<meta name="google" content="notranslate">
+	<title>Stream Node</title>
+
+	<!-- Icons -->
+	<link rel="apple-touch-icon" sizes="180x180" href="/static/image/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/static/image/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/static/image/favicon-16x16.png">
+	<link rel="manifest" href="/static/image/site.webmanifest">
+	<link rel="mask-icon" href="/static/image/safari-pinned-tab.svg" color="#ee7a28">
+	<link rel="shortcut icon" href="/static/image/favicon.ico">
+	<meta name="msapplication-TileColor" content="#ee7a28">
+	<meta name="msapplication-config" content="/static/image/browserconfig.xml">
+	<meta name="theme-color" content="#224873">
+
+	<!-- Scripts -->
+	<script type="text/javascript" src="/static/jquery-3.6.4/jquery-3.6.4.min.js"></script>
+	<script type="text/javascript" src="/static/articulate/articulate.min.js"></script>
+	<script type="text/javascript" src="/static/socket.io-4.6.1/socket.io.min.js"></script>
+	<script type="text/javascript" src="/static/smoothie/smoothie.js"></script>
+	<script type="text/javascript" src="/static/magnific-1.1.0/magnific-inline-min.js"></script>
+	<script type="text/javascript" src="/static/svgasset.js"></script>
+	<script type="text/javascript" src="/static/rotorhazard.js"></script>
+
+	<!-- CSS -->
+	<link rel="stylesheet" href="/static/magnific-1.1.0/magnific-popup.css"></link>
+	<link rel="stylesheet" href="/static/stream.css"></link>
+
+	<link rel="stylesheet" href="/ddr_overlays/static/fonts/teko/stylesheet.css"></link>
+	<link rel="stylesheet" href="/ddr_overlays/static/css/ddr_overlays.css"></link>
+
+
+	<!-- Child template head content -->
+
+</head>
+
+<body>
+
+<script type="text/javascript" charset="utf-8" src="/ddr_overlays/static/js/ddr_overlays.js"></script>
+
+<script type="text/javascript" charset="utf-8">
+
+    /*
+	var data_dependencies = [
+		'all_languages',
+		'language',
+		'pilot_data',
+		'leaderboard',
+		'race_status',
+	]; */
+
+    var data_dependencies = [
+		'all_languages',
+		'language',
+		'pilot_data',
+		'leaderboard',
+		'race_status',
+		'heat_data'
+	];
+
+	rotorhazard.show_messages = false;
+
+	var request_time;
+	var request_pi_time;
+	var resume_check = true;
+
+	var ddr_pilots;
+
+	function race_kickoff(msg) {
+		rotorhazard.timer.stopAll();
+
+		var staging_start_pi = (msg.pi_staging_at_s * 1000); // convert seconds (pi) to millis (JS)
+		var race_start_pi = (msg.pi_starts_at_s * 1000); // convert seconds (pi) to millis (JS)
+
+		rotorhazard.timer.race.hidden_staging = Boolean(msg.hide_stage_timer);
+		rotorhazard.timer.race.count_up = Boolean(msg.unlimited_time);
+		rotorhazard.timer.race.duration_tenths = msg.race_time_sec * 10;
+
+		rotorhazard.timer.race.start(race_start_pi, staging_start_pi);
+	}
+
+	$(document).ready(function () {
+		// get pi time
+		rotorhazard.pi_time_request = window.performance.now();
+		socket.emit('get_pi_time');
+
+		socket.on('language', function (msg) {
+			if (msg.language) {
+				rotorhazard.interface_language = msg.language;
+			}
+		});
+
+		// set up node local store
+		for (i = 0; i < {{ num_nodes }}; i++) {
+			rotorhazard.nodes[i] = new nodeModel();
+		}
+
+		socket.on('race_scheduled', function (msg) {
+			if (msg.scheduled) {
+				var deferred_start = msg.scheduled_at * 1000;  // convert seconds (pi) to millis (JS)
+				rotorhazard.timer.deferred.start(deferred_start, null);
+			} else {
+				rotorhazard.timer.deferred.stop();
+			}
+		});
+
+
+
+		socket.on('pilot_data', function (msg) {
+			rotorhazard.event.pilot_attributes = msg.attributes;
+			rotorhazard.event.pilots = msg.pilots;
+			rotorhazard.options.pilotSort = msg.pilotSort;
+			ddr_pilots = msg.pilots;	
+		});	
+
+
+		socket.on('heartbeat', function (msg) {
+		});
+
+		socket.on('leaderboard', function (msg) {
+	
+			var race = msg.current;
+
+
+			$('.curr_heat_title').html(race.displayname);
+
+			leaderboard_type = race.leaderboard.meta.primary_leaderboard;
+			$('#nextup_pilot_box').empty();
+			build_fai_nextup(race.leaderboard[leaderboard_type], 'current', race.leaderboard.meta);
+			
+		});
+
+		socket.on('prestage_ready', function (msg) {
+			request_time = new Date();
+		});
+
+		socket.on('stage_ready', function (msg) {
+			race_kickoff(msg);
+		});
+
+		socket.on('stop_timer', function (msg) {
+			rotorhazard.timer.stopAll();
+		});
+
+		
+	});
+
+	function speak(obj, priority) {} // stub to prevent crashing
+
+
+	
+
+</script>
+
+<main class="page-stream">
+	
+
+    <div id="ddr_nextup">
+
+		<div id="nextup_title">
+			Next Up:
+		</div>
+
+        <div id="title">
+            <span class="curr_heat_title"></span> - 
+            <span class="curr_event_name">{{ getOption('eventName') }}</span>
+        </div>
+
+
+        <div id="nextup_pilot_box">
+
+            <div class="nextup_pilot">
+
+                <div class="nextup_pilot_avatar">
+                    <div class="nextup_pilot_avatar_mask">
+                        <img src="/ddr/static/imgs/no-avatar.webp" alt="Avatar">
+                    </div>
+                </div>
+
+				<div class="nextup_pilot_flag">
+                    <div class="nextup_pilot_flag_mask">
+                        <img src="/ddr/static/imgs/flags/nl.jpg">
+                    </div>
+                </div>
+
+                <div class="nextup_pilot_name">
+                    MCK FPV
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+	<div id="race_lb">
+
+		<!--
+		<div class="race_lb_pilot">
+			<div class="pilot_flag">
+				<img src="http://localhost:5050/fpvscores/static/assets/imgs/flags/pl.jpg" alt="PL" height="32px">
+			</div>
+			<div class="pilot_pos">1.</div>
+			<div class="pilot_name">JesseFPV</div>
+			<div class="pilot_score">00:34.129</div>
+		</div>
+		-->
+
+	</div>
+
+
+</div>
+
+</main>
+
+
+</body>
+
+</html>
