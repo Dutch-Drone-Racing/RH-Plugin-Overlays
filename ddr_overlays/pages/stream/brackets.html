@@ -35,7 +35,8 @@
 
 	<link rel="stylesheet" href="/ddr_overlays/static/fonts/teko/stylesheet.css"></link>
 	<link rel="stylesheet" href="/ddr_overlays/static/css/ddr_overlays.css"></link>
-	<!--<link rel="stylesheet" href="/ddr_overlays/static/css/brackets.css"></link>-->
+	<!-- load a different CSS based on the number of pilots -->
+	<link rel="stylesheet" href="/ddr_overlays/static/css/brackets_{{ numb_pilots }}.css"></link>
 
 	<!-- Child template head content -->
 
@@ -187,6 +188,7 @@
 
     let race_class_id;
     let race_class_title = '{{ class_title }}';
+    let race_numb_pilots = '{{ numb_pilots }}';
 
 
 

@@ -389,7 +389,7 @@ function loadEliminationBracket(){
 		html += '<div class="bracket_race_title">' + heat.displayname + '</div>';
 		html += '<div class="bracket_race_pilots">';
 		  
-		const filtered_slots = heat.slots.filter(slot => slot.seed_id && slot.seed_rank);
+		const filtered_slots = heat.slots.filter(slot => /*slot.seed_id*/true && slot.seed_rank);
 		
 		console.log(filtered_slots);
 
@@ -436,100 +436,184 @@ function loadEliminationBracket(){
 		html += '</div>';
 
 
-		if(i < 4){		
-			column_counter = 0;	
-			if($('#bracket_column_' + column_counter).length == 0){
-				$('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-			}
-			$('#bracket_column_'+column_counter).append( html );
-		}
+        if (race_numb_pilots == 16) { //eliminations_heats.length == 14) {
+            // double elimination, 16 pilots, MultiGP
+            if(i < 4){		
+			    column_counter = 0;	
+			    if($('#bracket_column_' + column_counter).length == 0){
+				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_'+column_counter).append( html );
+		    }
 
-		if(i < 8 && i >= 4){
-			column_counter = 1;
-			if($('#bracket_column_' + column_counter).length == 0){
-				$('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-			}
-			$('#bracket_column_'+column_counter).append( html );
-		}
+		    if(i < 5 && i >= 4){
+			    column_counter = 1;
+			    if($('#bracket_column_loser_' + column_counter).length == 0){
+				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_loser_'+column_counter).append( html );
+		    }
 
-		if(i < 12 && i >= 8){
-			column_counter = 2;
-			if($('#bracket_column_' + column_counter).length == 0){
-				$('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-			}
-			$('#bracket_column_'+column_counter).append( html );
-		}
-	
-		if(i < 16 && i >= 12){
-			column_counter = 1;
-			if($('#bracket_column_loser_' + column_counter).length == 0){
-				$('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-			}
-			$('#bracket_column_loser_'+column_counter).append( html );
-		}
+		    if(i < 6 && i >= 5){
+			    column_counter = 1;
+			    if($('#bracket_column_' + column_counter).length == 0){
+				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_'+column_counter).append( html );
+		    }
+	    
+		    if(i < 7 && i >= 6){
+			    column_counter = 1;
+			    if($('#bracket_column_loser_' + column_counter).length == 0){
+				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_loser_'+column_counter).append( html );
+		    }
 
-		if(i < 20 && i >= 16){
-			column_counter = 2;
-			if($('#bracket_column_loser_' + column_counter).length == 0){
-				$('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-			}
-			$('#bracket_column_loser_'+column_counter).append( html );
-		}
+		    if(i < 8 && i >= 7){
+			    column_counter = 1;
+			    if($('#bracket_column_' + column_counter).length == 0){
+				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_'+column_counter).append( html );
+		    }
+		    
+		    if(i < 10 && i >= 8){
+			    column_counter = 2;
+			    if($('#bracket_column_loser_' + column_counter).length == 0){
+				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_loser_'+column_counter).append( html );
+		    }
+		    
+		    if(i < 11 && i >= 10){
+			    column_counter = 2;
+			    if($('#bracket_column_' + column_counter).length == 0){
+				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_'+column_counter).append( html );
+		    }
+		    
+		    if(i < 12 && i >= 11){
+			    column_counter = 3;
+			    if($('#bracket_column_loser_' + column_counter).length == 0){
+				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_loser_'+column_counter).append( html );
+		    }
+		    
+		    if(i < 13 && i >= 12){
+			    column_counter = 4;
+			    if($('#bracket_column_loser_' + column_counter).length == 0){
+				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_loser_'+column_counter).append( html );
+		    }
+		    
+		    if(i < 14 && i >= 13){
+			    column_counter = 3;
+			    if($('#bracket_column_' + column_counter).length == 0){
+				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_'+column_counter).append( html );
+		    }
+        } else if (race_numb_pilots == 32) {
+            // double elimination, 32 pilots, FAI
+		    if(i < 4){		
+			    column_counter = 0;	
+			    if($('#bracket_column_' + column_counter).length == 0){
+				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_'+column_counter).append( html );
+		    }
 
-		if(i < 22 && i >= 20){
-			column_counter = 3;
-			if($('#bracket_column_loser_' + column_counter).length == 0){
-				$('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-			}
-			$('#bracket_column_loser_'+column_counter).append( html );
-		}
+		    if(i < 8 && i >= 4){
+			    column_counter = 1;
+			    if($('#bracket_column_' + column_counter).length == 0){
+				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_'+column_counter).append( html );
+		    }
 
-		if(i < 24 && i >= 22){
-			column_counter = 3;
-			if($('#bracket_column_' + column_counter).length == 0){
-				$('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-			}
-			$('#bracket_column_'+column_counter).append( html );
-		}
+		    if(i < 12 && i >= 8){
+			    column_counter = 2;
+			    if($('#bracket_column_' + column_counter).length == 0){
+				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_'+column_counter).append( html );
+		    }
+	    
+		    if(i < 16 && i >= 12){
+			    column_counter = 1;
+			    if($('#bracket_column_loser_' + column_counter).length == 0){
+				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_loser_'+column_counter).append( html );
+		    }
 
-		if(i < 26 && i >= 24){
-			column_counter = 4;
-			if($('#bracket_column_loser_' + column_counter).length == 0){
-				$('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-			}
-			$('#bracket_column_loser_'+column_counter).append( html );
-		}
+		    if(i < 20 && i >= 16){
+			    column_counter = 2;
+			    if($('#bracket_column_loser_' + column_counter).length == 0){
+				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_loser_'+column_counter).append( html );
+		    }
 
-		if(i < 27 && i >= 26){
-			column_counter = 5;
-			if($('#bracket_column_loser_' + column_counter).length == 0){
-				$('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-			}
-			$('#bracket_column_loser_'+column_counter).append( html );
-		}
+		    if(i < 22 && i >= 20){
+			    column_counter = 3;
+			    if($('#bracket_column_loser_' + column_counter).length == 0){
+				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_loser_'+column_counter).append( html );
+		    }
 
-		if(i < 28 && i >= 27){
-			column_counter = 4;
-			if($('#bracket_column_' + column_counter).length == 0){
-				$('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-			}
-			$('#bracket_column_'+column_counter).append( html );
-		}
+		    if(i < 24 && i >= 22){
+			    column_counter = 3;
+			    if($('#bracket_column_' + column_counter).length == 0){
+				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_'+column_counter).append( html );
+		    }
 
-		if(i < 29 && i >= 28){
-			column_counter = 6;
-			if($('#bracket_column_loser_' + column_counter).length == 0){
-				$('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-			}
-			$('#bracket_column_loser_'+column_counter).append( html );
-		}
+		    if(i < 26 && i >= 24){
+			    column_counter = 4;
+			    if($('#bracket_column_loser_' + column_counter).length == 0){
+				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_loser_'+column_counter).append( html );
+		    }
 
-		if(i < 30 && i >= 29){
-			column_counter = 5;
-			if($('#bracket_column_' + column_counter).length == 0){
-				$('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-			}
-			$('#bracket_column_'+column_counter).append( html );
+		    if(i < 27 && i >= 26){
+			    column_counter = 5;
+			    if($('#bracket_column_loser_' + column_counter).length == 0){
+				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_loser_'+column_counter).append( html );
+		    }
+
+		    if(i < 28 && i >= 27){
+			    column_counter = 4;
+			    if($('#bracket_column_' + column_counter).length == 0){
+				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_'+column_counter).append( html );
+		    }
+
+		    if(i < 29 && i >= 28){
+			    column_counter = 6;
+			    if($('#bracket_column_loser_' + column_counter).length == 0){
+				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_loser_'+column_counter).append( html );
+		    }
+
+		    if(i < 30 && i >= 29){
+			    column_counter = 5;
+			    if($('#bracket_column_' + column_counter).length == 0){
+				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+			    }
+			    $('#bracket_column_'+column_counter).append( html );
+		    }
 		}
 
 

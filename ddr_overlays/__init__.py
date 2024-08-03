@@ -69,8 +69,8 @@ def initialize(rhapi):
         )
     
     @bp.route('/ddr_overlays/stream/brackets/<string:bracket_type>/<int:numb_pilots>/<string:class_title>')
-    def ddr_overlays_brackets32(bracket_type, numb_pilots, class_title):
-        return templating.render_template('stream/brackets32.html', serverInfo=None, getOption=rhapi.db.option,__=rhapi.__,
+    def ddr_overlays_brackets(bracket_type, numb_pilots, class_title):
+        return templating.render_template('stream/brackets.html', serverInfo=None, getOption=rhapi.db.option,__=rhapi.__,
             bracket_type=bracket_type, numb_pilots=numb_pilots, class_title=class_title
         )
 
