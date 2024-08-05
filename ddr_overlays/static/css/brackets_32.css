@@ -20,13 +20,13 @@
 }
 
 .bracket_race {
-    width: 200px;
     min-height: 100px;
     border: 1px solid #013e77;
     border-radius: 4px;
     overflow: hidden;
     margin-bottom: 20px;
     background-color: #fff;
+    /*display: inline-block;*/
 }
 
 .bracket_race_title {
@@ -36,6 +36,11 @@
     text-align: center;
     background-color: #013e77;
     color: #fff;
+}
+
+.bracket_race_pilots {
+    min-width: 200px;
+    white-space: nowrap;
 }
 
 .bracket_race_pilot {
@@ -120,6 +125,7 @@
 .bracket_group .bracket_column:nth-child(4) .bracket_race {
     margin-top: 150px;
 }
+
 .bracket_group .bracket_column:nth-child(4) .bracket_race:nth-child(2) {
     margin-top: 200px;
 }
