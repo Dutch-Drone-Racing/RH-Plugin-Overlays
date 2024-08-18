@@ -58,7 +58,32 @@
 		rotorhazard.show_messages = false;
 		var result_data;
 		var streamclass = {{ class_id }}
-	
+
+		function carousel() {
+			var currentPage = 1; // Start bij pagina 1
+			var totalPages = document.querySelectorAll('.leaderboard_fai_page').length; // Telt het aantal pagina's
+			var pages = document.querySelectorAll('.leaderboard_fai_page'); // Selecteert alle pagina's
+			var paginationText = document.getElementById('leaderboard_pagination'); // Selecteert de paginatie div
+			paginationText.textContent = 'page ' + currentPage + '/' + totalPages; // Initialization
+
+			function rotatePages() {
+				// Verwijder 'active' klasse van alle pagina's
+				pages.forEach(page => page.classList.remove('active'));
+
+				// Voeg 'active' klasse toe aan de huidige pagina
+				document.getElementById('leaderboard_fai_p' + currentPage).classList.add('active');
+
+				// Update de paginatie tekst
+				paginationText.textContent = 'page ' + currentPage + '/' + totalPages;
+
+				// Bereken de volgende pagina
+				currentPage = (currentPage % totalPages) + 1;
+			}
+
+			// Stel de interval in om de functie elke 5 seconden te roepen
+			setInterval(rotatePages, 7000);
+		};
+
 		$(document).ready(function () {
 			if (!{{ class_id }}) {
 				socket.emit('load_data', {'load_types': [
@@ -161,7 +186,8 @@
 
 									render_pilots(rotorhazard);
 
-
+									// Start carousel
+									carousel();
 								} else {
 									display_nothing()
 								}
@@ -205,40 +231,11 @@
 			page 1/4
 		</div>
 
-
 	</main>
-	
 
 	<div id="pilotlist">
 
 	</div>
-
-	<script>
-		document.addEventListener('DOMContentLoaded', function() {
-			var currentPage = 1; // Start bij pagina 1
-			var totalPages = document.querySelectorAll('.leaderboard_fai_page').length; // Telt het aantal pagina's
-			var pages = document.querySelectorAll('.leaderboard_fai_page'); // Selecteert alle pagina's
-			var paginationText = document.getElementById('leaderboard_pagination'); // Selecteert de paginatie div
-		
-			function rotatePages() {
-				// Verwijder 'active' klasse van alle pagina's
-				pages.forEach(page => page.classList.remove('active'));
-		
-				// Voeg 'active' klasse toe aan de huidige pagina
-				document.getElementById('leaderboard_fai_p' + currentPage).classList.add('active');
-		
-				// Update de paginatie tekst
-				paginationText.textContent = 'page ' + currentPage + '/' + totalPages;
-		
-				// Bereken de volgende pagina
-				currentPage = (currentPage % totalPages) + 1;
-			}
-		
-			// Stel de interval in om de functie elke 5 seconden te roepen
-			setInterval(rotatePages, 7000);
-		});
-		</script>
-
 
 </body>
 
