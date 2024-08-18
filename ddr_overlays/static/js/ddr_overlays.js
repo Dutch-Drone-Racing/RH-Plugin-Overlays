@@ -1,7 +1,8 @@
 /* Leaderboards */
 function build_fai_nextup(leaderboard, display_type, meta, display_starts=false) {
-	if (typeof(display_type) === 'undefined')
+	if (typeof(display_type) === 'undefined') {
 		var display_type = 'by_race_time';
+	}
 	if (typeof(meta) === 'undefined') {
 		var meta = new Object;
 		meta.team_racing_mode = false;
@@ -16,7 +17,7 @@ function build_fai_nextup(leaderboard, display_type, meta, display_starts=false)
 		let flag = getPilotFlag(leaderboard[i].pilot_id, ddr_pilots);
 
 		let pilotImg = '/static/user/avatars/' + leaderboard[i].callsign.replace(/ /g,"_").toLowerCase() + '.jpg';		
-		if(!imageExists(pilotImg)){
+		if (!imageExists(pilotImg)) {
 			pilotImg = '/ddr_overlays/static/imgs/no_avatar.png';
 		}
 
@@ -25,15 +26,12 @@ function build_fai_nextup(leaderboard, display_type, meta, display_starts=false)
 		$('#nextup_pilot_box').append(html);
 
 	}
-
-	//return twrap;
 }
 
-
 function build_leaderboard_fai(leaderboard, display_type, meta, display_starts=false, rotorhazard) {
-
-	if (typeof(display_type) === 'undefined')
+	if (typeof(display_type) === 'undefined') {
 		var display_type = 'by_race_time';
+	}
 	if (typeof(meta) === 'undefined') {
 		var meta = new Object;
 		meta.team_racing_mode = false;
@@ -41,7 +39,6 @@ function build_leaderboard_fai(leaderboard, display_type, meta, display_starts=f
 		meta.consecutives_count = 0;
 		meta.primary_leaderboard = null;
 	}
-
 
 	if (display_type == 'round') {
 		var show_points = true;
@@ -112,8 +109,8 @@ function build_leaderboard_fai(leaderboard, display_type, meta, display_starts=f
 		// ADD AVATAR
 
 		var pilotImg = '/static/user/avatars/' + leaderboard[i].callsign.replace(/ /g,"_").toLowerCase() + '.jpg';
-					
-		if(!imageExists(pilotImg)){
+
+		if (!imageExists(pilotImg)) {
 			pilotImg = '/ddr_overlays/static/imgs/no_avatar.png';
 		}
 
@@ -121,10 +118,8 @@ function build_leaderboard_fai(leaderboard, display_type, meta, display_starts=f
 
 		row.append('<td class="flag" id="pilot_id_flag_'+leaderboard[i].pilot_id+'"><img class="country_flag" src="/ddr_overlays/static/imgs/flags/nl.jpg"></td>');
 
-
 		country_flag = '';
 		var pilot_name_flag = leaderboard[i].callsign;
-		
 
 		row.append('<td class="pilot">'+ pilot_name_flag +'</td>');
 		if (meta.team_racing_mode) {
@@ -233,398 +228,347 @@ function build_leaderboard_fai(leaderboard, display_type, meta, display_starts=f
 
 	table.append(body);
 	twrap.append(table);
-	return twrap;
 
+	return twrap;
 }
 
-
-
-function getPilotFlag(pilot_id, ddr_pilots){
-	
+function getPilotFlag(pilot_id, ddr_pilots) {
 	count = Object.keys(ddr_pilots).length;
 	for (var i = 0; i < count; i++) {
-
 		let pilot = ddr_pilots[i];
 
 		if (pilot.pilot_id == pilot_id) {
-								
 			pilot = ddr_pilots[i];
-
-			if(pilot.country){
+			if (pilot.country) {
 				country_upp = pilot.country;
 				//country_flag = '<img class="country_flag" src="/fpvscores/static/assets/imgs/flags/'+country_upp+'.jpg">';
 				//$('#pilot_flag').html(country_flag);
 				return country_upp;
 			}
-
 			break;
 		}
 	}
-
 }
 
-
-function imageExists(image_url){
+function imageExists(image_url) {
 	var http = new XMLHttpRequest();
 	http.open('HEAD', image_url, false);
 	http.send();
 	return http.status != 404;
 }
 
-
-
-
 function pilot_attributes(rotorhazard) {
-    for (var i in rotorhazard.event.pilots) {
-        var pilot = rotorhazard.event.pilots[i];
-        if (pilot.pilot_id != 0) {
-        pilot.attributes = [];
-        for (var attr_idx in rotorhazard.event.pilot_attributes) {
-            var pilot_attr = rotorhazard.event.pilot_attributes[attr_idx];
-            if (pilot[pilot_attr.name] != undefined) {
-            pilot_attr.value = pilot[pilot_attr.name];
-            } else {
-            pilot_attr.value = '';
-            }
-            var pilot_attr_name = pilot_attr.name;
-            var attr_object = { name: pilot_attr_name, value: pilot_attr.value };
-            //pilot.attributes.push(attr_object);
-            pilot.attributes[pilot_attr_name] = attr_object;
-        }
-        }
-    }
+	for (var i in rotorhazard.event.pilots) {
+		var pilot = rotorhazard.event.pilots[i];
+		if (pilot.pilot_id != 0) {
+			pilot.attributes = [];
+			for (var attr_idx in rotorhazard.event.pilot_attributes) {
+				var pilot_attr = rotorhazard.event.pilot_attributes[attr_idx];
+				if (pilot[pilot_attr.name] != undefined) {
+					pilot_attr.value = pilot[pilot_attr.name];
+				} else {
+					pilot_attr.value = '';
+				}
+				var pilot_attr_name = pilot_attr.name;
+				var attr_object = { name: pilot_attr_name, value: pilot_attr.value };
+				//pilot.attributes.push(attr_object);
+				pilot.attributes[pilot_attr_name] = attr_object;
+			}
+		}
+	}
 }
 
-function load_pilots(rotorhazard){
+function load_pilots(rotorhazard) {
+	rotorhazard = rotorhazard;
+	render_pilots(rotorhazard);
 
-    rotorhazard = rotorhazard;
-    render_pilots(rotorhazard);
-
-   
-    console.log('No active_single_pilot');
-    
-
+	console.log('No active_single_pilot');
 }
-
-
 
 function render_pilots(rotorhazard) {
-    var pilotlist = document.getElementById('pilotlist');
-    var pilotlist_html_2 = '';
+	var pilotlist = document.getElementById('pilotlist');
+	var pilotlist_html_2 = '';
 
+	pilot_attributes(rotorhazard);
 
-    pilot_attributes(rotorhazard);
-
-    for (var i = 0; i < rotorhazard.event.pilots.length; i++) {
-
-        pilot = rotorhazard.event.pilots[i];
-        //pilot.attributes = pilot_attributes(rotorhazard, rotorhazard.event.pilots[i].pilot_id);
-        //console.log(pilot);
-        country_flag = pilot.attributes.country.value.toLowerCase();
+	for (var i = 0; i < rotorhazard.event.pilots.length; i++) {
+		pilot = rotorhazard.event.pilots[i];
+		//pilot.attributes = pilot_attributes(rotorhazard, rotorhazard.event.pilots[i].pilot_id);
+		//console.log(pilot);
+		country_flag = pilot.attributes.country.value.toLowerCase();
 		pilot_id = pilot.pilot_id;
 		console.log(country_flag + ' - ' + pilot_id);
 
 		// if div exists pilot_id_flag_'+leaderboard[i].pilot_id+'
-		if(document.getElementById('pilot_id_flag_'+pilot.pilot_id)){
+		if (document.getElementById('pilot_id_flag_'+pilot.pilot_id)) {
 			//console.log('pilot_id_flag_'+pilot.pilot_id);
 			document.getElementById('pilot_id_flag_'+pilot.pilot_id).innerHTML = '<img class="country_flag" src="/ddr_overlays/static/imgs/flags/'+country_flag+'.jpg">';
 		}
+	}
 
-    }
+	//pilots = rotorhazard.event.pilots;
 
-    //pilots = rotorhazard.event.pilots;
+	//pilotlist.innerHTML = pilotlist_html_2;
 
-    //pilotlist.innerHTML = pilotlist_html_2;
-    
 }
 
-
-
-
-
-
-function loadEliminationBracket(){
+function loadEliminationBracket() {
 
 	//console.log(ddr_class_data);
 
-	//clear brackets
+	// clear brackets
 	$('#winner_bracket_content').html('');
 	$('#loser_bracket_content').html('');
-
 
 	//console.log(ddr_race_data.classes);
 	var classes = ddr_class_data;
 	Object.values(classes).forEach(race_class => {
 		if (race_class.name === race_class_title) {
-			
 			console.log(race_class);
 			race_class_id = race_class.id;
-
 		}
 	});
-
 
 	var eliminations_heats = [];
 
 	Object.values(ddr_heat_data).forEach(heat => {
 		if (heat.class_id === race_class_id) {
-			
 			eliminations_heats.push(heat);
-
 		}
 	});
-
 
 	console.log(eliminations_heats);
 
 	//loop through heats and build brackets
-	
+
 	console.log('there are ' + eliminations_heats.length + ' heats');
 
 	column_counter = 1;
-	
 	for (let i = 0; i < eliminations_heats.length; i++) {
 		const heat = eliminations_heats[i];
 		let html = '<div class="bracket_race">';
 		html += '<div class="bracket_race_title">' + heat.displayname + '</div>';
 		html += '<div class="bracket_race_pilots">';
-		  
+
 		const filtered_slots = heat.slots.filter(slot => /*slot.seed_id*/true && slot.seed_rank);
-		
+
 		console.log(filtered_slots);
 
 		for (let j = 0; j < filtered_slots.length; j++) {
 			const slot = filtered_slots[j];
-			const pilot = ddr_pilots.find(p => p.pilot_id === slot.pilot_id);            
+			const pilot = ddr_pilots.find(p => p.pilot_id === slot.pilot_id);			
 
-			if(slot.pilot_id === 0){
-						
-					if (slot.method > -1 && !(slot.method == 0 && !slot.pilot_id)) {
-						var method_text = get_method_descriptor(slot.method, slot.seed_id, slot.seed_rank, slot.pilot_id)
-						html += '<div class="bracket_race_pilot">';
-						html += '<div class="no_pilot">' + method_text + '</div>';
-						html += '</div>';
-					}
-				
-
-
-			}
-			else{
-
+			if (slot.pilot_id === 0) {
+				if (slot.method > -1 && !(slot.method == 0 && !slot.pilot_id)) {
+					var method_text = get_method_descriptor(slot.method, slot.seed_id, slot.seed_rank, slot.pilot_id)
+					html += '<div class="bracket_race_pilot">';
+					html += '<div class="no_pilot">' + method_text + '</div>';
+					html += '</div>';
+				}
+			} else {
 				let flag = getPilotFlag(slot.pilot_id, ddr_pilots);
 
 				let pilotImg = '/static/user/avatars/' + pilot.callsign.replace(/ /g,"_").toLowerCase() + '.jpg';		
-				if(!imageExists(pilotImg)){
+				if (!imageExists(pilotImg)) {
 					pilotImg = '/ddr_overlays/static/imgs/no_avatar.png';
 				}
 
 				html += '<div class="bracket_race_pilot">';
-				
+
 				html += '<div class="avatar"><img src="'+pilotImg+'"></div>';
 				html += '<div class="flag"><img src="/ddr_overlays/static/imgs/flags/'+flag+'.jpg" alt="USA"></div>';
 				html += '<div class="pilot_name">' + pilot.callsign + '</div>';
 
-
 				html += '</div>';
 			}
-
-
-
 		}
 
 		html += '</div>';
 		html += '</div>';
 
+		if (race_numb_pilots == 16) {
+			// double elimination, 16 pilots, MultiGP
+			if (i < 4) {		
+				column_counter = 0;	
+				if ($('#bracket_column_' + column_counter).length == 0) {
+					$('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_'+column_counter).append( html );
+			}
 
-        if (race_numb_pilots == 16) { //eliminations_heats.length == 14) {
-            // double elimination, 16 pilots, MultiGP
-            if(i < 4){		
-			    column_counter = 0;	
-			    if($('#bracket_column_' + column_counter).length == 0){
-				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_'+column_counter).append( html );
-		    }
+			if (i < 5 && i >= 4) {
+				column_counter = 1;
+				if ($('#bracket_column_loser_' + column_counter).length == 0) {
+					$('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_loser_'+column_counter).append( html );
+			}
 
-		    if(i < 5 && i >= 4){
-			    column_counter = 1;
-			    if($('#bracket_column_loser_' + column_counter).length == 0){
-				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_loser_'+column_counter).append( html );
-		    }
+			if (i < 6 && i >= 5) {
+				column_counter = 1;
+				if ($('#bracket_column_' + column_counter).length == 0) {
+					$('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_'+column_counter).append( html );
+			}
 
-		    if(i < 6 && i >= 5){
-			    column_counter = 1;
-			    if($('#bracket_column_' + column_counter).length == 0){
-				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_'+column_counter).append( html );
-		    }
-	    
-		    if(i < 7 && i >= 6){
-			    column_counter = 1;
-			    if($('#bracket_column_loser_' + column_counter).length == 0){
-				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_loser_'+column_counter).append( html );
-		    }
+			if (i < 7 && i >= 6) {
+				column_counter = 1;
+				if ($('#bracket_column_loser_' + column_counter).length == 0) {
+					$('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_loser_'+column_counter).append( html );
+			}
 
-		    if(i < 8 && i >= 7){
-			    column_counter = 1;
-			    if($('#bracket_column_' + column_counter).length == 0){
-				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_'+column_counter).append( html );
-		    }
-		    
-		    if(i < 10 && i >= 8){
-			    column_counter = 2;
-			    if($('#bracket_column_loser_' + column_counter).length == 0){
-				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_loser_'+column_counter).append( html );
-		    }
-		    
-		    if(i < 11 && i >= 10){
-			    column_counter = 2;
-			    if($('#bracket_column_' + column_counter).length == 0){
-				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_'+column_counter).append( html );
-		    }
-		    
-		    if(i < 12 && i >= 11){
-			    column_counter = 3;
-			    if($('#bracket_column_loser_' + column_counter).length == 0){
-				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_loser_'+column_counter).append( html );
-		    }
-		    
-		    if(i < 13 && i >= 12){
-			    column_counter = 4;
-			    if($('#bracket_column_loser_' + column_counter).length == 0){
-				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_loser_'+column_counter).append( html );
-		    }
-		    
-		    if(i < 14 && i >= 13){
-			    column_counter = 3;
-			    if($('#bracket_column_' + column_counter).length == 0){
-				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_'+column_counter).append( html );
-		    }
-        } else if (race_numb_pilots == 32) {
-            // double elimination, 32 pilots, FAI
-		    if(i < 4){		
-			    column_counter = 0;	
-			    if($('#bracket_column_' + column_counter).length == 0){
-				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_'+column_counter).append( html );
-		    }
+			if (i < 8 && i >= 7) {
+				column_counter = 1;
+				if ($('#bracket_column_' + column_counter).length == 0) {
+					$('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_'+column_counter).append( html );
+			}
 
-		    if(i < 8 && i >= 4){
-			    column_counter = 1;
-			    if($('#bracket_column_' + column_counter).length == 0){
-				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_'+column_counter).append( html );
-		    }
+			if (i < 10 && i >= 8) {
+				column_counter = 2;
+				if ($('#bracket_column_loser_' + column_counter).length == 0) {
+					$('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_loser_'+column_counter).append( html );
+			}
 
-		    if(i < 12 && i >= 8){
-			    column_counter = 2;
-			    if($('#bracket_column_' + column_counter).length == 0){
-				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_'+column_counter).append( html );
-		    }
-	    
-		    if(i < 16 && i >= 12){
-			    column_counter = 1;
-			    if($('#bracket_column_loser_' + column_counter).length == 0){
-				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_loser_'+column_counter).append( html );
-		    }
+			if (i < 11 && i >= 10) {
+				column_counter = 2;
+				if ($('#bracket_column_' + column_counter).length == 0) {
+					$('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_'+column_counter).append( html );
+			}
 
-		    if(i < 20 && i >= 16){
-			    column_counter = 2;
-			    if($('#bracket_column_loser_' + column_counter).length == 0){
-				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_loser_'+column_counter).append( html );
-		    }
+			if (i < 12 && i >= 11) {
+				column_counter = 3;
+				if ($('#bracket_column_loser_' + column_counter).length == 0) {
+					$('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_loser_'+column_counter).append( html );
+			}
 
-		    if(i < 22 && i >= 20){
-			    column_counter = 3;
-			    if($('#bracket_column_loser_' + column_counter).length == 0){
-				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_loser_'+column_counter).append( html );
-		    }
+			if (i < 13 && i >= 12) {
+				column_counter = 4;
+				if ($('#bracket_column_loser_' + column_counter).length == 0) {
+					$('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_loser_'+column_counter).append( html );
+			}
 
-		    if(i < 24 && i >= 22){
-			    column_counter = 3;
-			    if($('#bracket_column_' + column_counter).length == 0){
-				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_'+column_counter).append( html );
-		    }
+			if (i < 14 && i >= 13) {
+				column_counter = 3;
+				if ($('#bracket_column_' + column_counter).length == 0) {
+					$('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_'+column_counter).append( html );
+			}
+		} else if (race_numb_pilots == 32) {
+			// double elimination, 32 pilots, FAI
+			if (i < 4) {		
+				column_counter = 0;	
+				if ($('#bracket_column_' + column_counter).length == 0) {
+					$('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_'+column_counter).append( html );
+			}
 
-		    if(i < 26 && i >= 24){
-			    column_counter = 4;
-			    if($('#bracket_column_loser_' + column_counter).length == 0){
-				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_loser_'+column_counter).append( html );
-		    }
+			if (i < 8 && i >= 4) {
+				column_counter = 1;
+				if ($('#bracket_column_' + column_counter).length == 0) {
+					$('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_'+column_counter).append( html );
+			}
 
-		    if(i < 27 && i >= 26){
-			    column_counter = 5;
-			    if($('#bracket_column_loser_' + column_counter).length == 0){
-				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_loser_'+column_counter).append( html );
-		    }
+			if (i < 12 && i >= 8) {
+				column_counter = 2;
+				if ($('#bracket_column_' + column_counter).length == 0) {
+					$('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_'+column_counter).append( html );
+			}
 
-		    if(i < 28 && i >= 27){
-			    column_counter = 4;
-			    if($('#bracket_column_' + column_counter).length == 0){
-				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_'+column_counter).append( html );
-		    }
+			if (i < 16 && i >= 12) {
+				column_counter = 1;
+				if ($('#bracket_column_loser_' + column_counter).length == 0) {
+					$('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_loser_'+column_counter).append( html );
+			}
 
-		    if(i < 29 && i >= 28){
-			    column_counter = 6;
-			    if($('#bracket_column_loser_' + column_counter).length == 0){
-				    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_loser_'+column_counter).append( html );
-		    }
+			if (i < 20 && i >= 16) {
+				column_counter = 2;
+				if ($('#bracket_column_loser_' + column_counter).length == 0) {
+					$('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_loser_'+column_counter).append( html );
+			}
 
-		    if(i < 30 && i >= 29){
-			    column_counter = 5;
-			    if($('#bracket_column_' + column_counter).length == 0){
-				    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-			    }
-			    $('#bracket_column_'+column_counter).append( html );
-		    }
+			if (i < 22 && i >= 20) {
+				column_counter = 3;
+				if ($('#bracket_column_loser_' + column_counter).length == 0) {
+					$('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_loser_'+column_counter).append( html );
+			}
+
+			if (i < 24 && i >= 22) {
+				column_counter = 3;
+				if ($('#bracket_column_' + column_counter).length == 0) {
+					$('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_'+column_counter).append( html );
+			}
+
+			if (i < 26 && i >= 24) {
+				column_counter = 4;
+				if ($('#bracket_column_loser_' + column_counter).length == 0) {
+					$('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_loser_'+column_counter).append( html );
+			}
+
+			if (i < 27 && i >= 26) {
+				column_counter = 5;
+				if ($('#bracket_column_loser_' + column_counter).length == 0) {
+					$('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_loser_'+column_counter).append( html );
+			}
+
+			if (i < 28 && i >= 27) {
+				column_counter = 4;
+				if ($('#bracket_column_' + column_counter).length == 0) {
+					$('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_'+column_counter).append( html );
+			}
+
+			if (i < 29 && i >= 28) {
+				column_counter = 6;
+				if ($('#bracket_column_loser_' + column_counter).length == 0) {
+					$('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_loser_'+column_counter).append( html );
+			}
+
+			if (i < 30 && i >= 29) {
+				column_counter = 5;
+				if ($('#bracket_column_' + column_counter).length == 0) {
+					$('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
+				}
+				$('#bracket_column_'+column_counter).append( html );
+			}
 		}
-
-
 	}
-
 }
 
-
-
-
-function get_method_descriptor (method, seed, rank, pilot_id) {
+function get_method_descriptor(method, seed, rank, pilot_id) {
 	if (method == 0) { // pilot
 		var pilot = ddr_pilots.find(obj => {return obj.pilot_id == pilot_id});
 

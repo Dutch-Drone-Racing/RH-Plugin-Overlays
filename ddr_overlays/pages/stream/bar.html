@@ -32,18 +32,18 @@
 	<!-- CSS -->
 	<link rel="stylesheet" href="/static/magnific-1.1.0/magnific-popup.css"></link>
 
-
 	<link rel="stylesheet" href="/static/stream.css"></link>
 	<link rel="stylesheet" href="/ddr_overlays/static/fonts/teko/stylesheet.css"></link>
 	<link rel="stylesheet" href="/ddr_overlays/static/css/ddr_overlays.css"></link>
 
+	<!-- Child template head content -->
 
 </head>
 
 <body>
 
-
 <script type="text/javascript" charset="utf-8">
+
 	var data_dependencies = [
 		'all_languages',
 		'language',
@@ -52,9 +52,7 @@
 		'result_data',
 	];
 
-
 	var rotorhazard;
-
 
 	rotorhazard.show_messages = false;
 
@@ -64,7 +62,6 @@
 	var result_data;
 
 	var streamclass;
-
 
 	function race_kickoff(msg) {
 		rotorhazard.timer.stopAll();
@@ -85,15 +82,14 @@
 		socket.emit('get_pi_time');
 
 		socket.emit('load_data', {'load_types': [
-				'current_heat',
+			'current_heat',
 		]});
-
 
 		socket.on('current_heat', function (msg) {
 
 			console.log('show it');
 			console.log(msg.heat_class);
-			
+
 			if (msg.heat_class) {
 				streamclass = msg.heat_class;
 				console.log(streamclass)
@@ -103,12 +99,9 @@
 
 					//var current_class = msg.classes[class_id];
 					$('#class_name').html(class_name);
-
 				}
-			} else {
-				//display_nothing()
 			}
-			
+
 		});
 
 		socket.on('pi_time', function (msg) {
@@ -170,8 +163,6 @@
 			}
 		});
 
-		
-
 		socket.on('race_scheduled', function (msg) {
 			if (msg.scheduled) {
 				var deferred_start = msg.scheduled_at * 1000;  // convert seconds (pi) to millis (JS)
@@ -226,30 +217,22 @@
 		});
 
 		socket.on('leaderboard', function (msg) {
-			
 			if (msg && 'last_race' in msg) {
 				var race = msg.last_race;
 			} else {
 				var race = msg.current;
 			}
 
-			
 			//showN1Pilot(msg);
 
 			//console.log(rotorhazard);
 
-			//rotorhazard
-			
-
 			var heatname = __('Heat') + ' ' + race.heat;
-			if (race.displayname)
+			if (race.displayname) {
 				heatname = race.displayname;
+			}
 
 			$('.curr_heat_Title').html(heatname);
-
-
-			
-			
 
 			leaderboard_type = race.leaderboard.meta.primary_leaderboard;
 			$('#leaderboard').empty();
@@ -293,7 +276,7 @@
 
 	function speak(obj, priority) {} // stub to prevent crashing
 
-	function showN1Pilot(msg){
+	function showN1Pilot(msg) {
 		//console.log('show N1 Pilot: ');
 		let n1PilotTag = msg.event_leaderboard.by_consecutives[0].callsign;
 		//console.log(n1PilotTag);
@@ -302,33 +285,31 @@
 		$('#n1PilotTag').html(n1PilotTag);
 	}
 
-
 	function displayClassName(streamclass, msg) {
-			console.log('msg is ' + streamclass);
-			console.log(msg);
-			if (!$.isEmptyObject(msg.heats)) {
-				for (var class_id in msg.heats_by_class) {
-					if (class_id == streamclass) {
-						var current_class = msg.classes[class_id];
-						if (current_class) {
-							//console.log(current_class);
-							if (current_class.name) {
-								class_name = current_class.name;
-							} else {
-								class_name = __('Class') + ' ' + current_class.id;
-							}
-
-							return class_name;
+		console.log('msg is ' + streamclass);
+		console.log(msg);
+		if (!$.isEmptyObject(msg.heats)) {
+			for (var class_id in msg.heats_by_class) {
+				if (class_id == streamclass) {
+					var current_class = msg.classes[class_id];
+					if (current_class) {
+						//console.log(current_class);
+						if (current_class.name) {
+							class_name = current_class.name;
+						} else {
+							class_name = __('Class') + ' ' + current_class.id;
 						}
+
+						return class_name;
 					}
 				}
-			} else {
-				return '';
 			}
+		} else {
+			return '';
+		}
 	}
 
 </script>
-
 
 <script>
 	document.addEventListener("DOMContentLoaded", function() {
@@ -348,8 +329,6 @@
 	});
 </script>
 
-
-
 <main id="ddr_frame_topbar_main">
 
 	<div id="ddr_frame_topbar">
@@ -359,13 +338,13 @@
 				<div class="timing-clock"><div class="time-display">--:--</div></div>
 			</div>
 		</div>
-	
+
 		<div id="block_center">
 			<div id="heatTitle" class="current_heat"><span class="curr_heat_Title">{{ __('Loading...') }} </span><span id="class_name"></span> | <span id="event_Title"> {{ getOption('eventName') }}</span></div>
 		</div>
-	
+
 		<div id="block_right">
-			
+
 			<img id="logo" src="/ddr_overlays/static/imgs/ddr_logo_white.png" height="54px" style="float: right; margin-right: 10px; margin-top: 2px;">
 			<!--
 			<div id="firstplace">
@@ -375,16 +354,9 @@
 		</div>
 	</div>
 
-
-
-
-
-
-
 	<!--<div class="race_status_message"></div>-->
 
 </main>
-
 
 </body>
 

@@ -50,7 +50,6 @@ h1, h2, h3, h4, h5 {
     flex-wrap: wrap;
 }
 
-
 #ddr_nextup .nextup_pilot {
     /*min-width: 300px;*/
     height: 600px;
@@ -156,7 +155,6 @@ h1, h2, h3, h4, h5 {
     float: left;
     height: 60px;
     padding: 0 12px;
-    
     font-size: 28px;
 }
 
@@ -177,7 +175,7 @@ h1, h2, h3, h4, h5 {
 
 }
 
-#ddr_node #node_info_bar #node_race_stats{
+#ddr_node #node_info_bar #node_race_stats {
     float: right;
     margin-right: 140px;
 }
@@ -187,7 +185,6 @@ h1, h2, h3, h4, h5 {
     line-height: 1;
     padding-top: 10px;
 }
-
 
 #ddr_node #node_info_bar #node_callsign {
     font-size: 40px;
@@ -254,7 +251,6 @@ h1, h2, h3, h4, h5 {
     padding: 0;
     color: #fff;
     font-family: teko, Arial, Helvetica, sans-serif;
-
 }
 
 /* END OF DDR NODE */
@@ -291,7 +287,6 @@ h1, h2, h3, h4, h5 {
     font-family: 'Courier New', Courier, monospace;
     text-transform: uppercase;
     font-style: italic;
-
 }
 
 #ddr_frame_topbar .race-running .timing-clock {
@@ -309,7 +304,6 @@ h1, h2, h3, h4, h5 {
     background-color: #00000000;
     color: orange;
     background-color: rgba(93, 60, 0, 0.701);
-
 }
 
 #ddr_frame_topbar #block_center {
@@ -342,7 +336,6 @@ h1, h2, h3, h4, h5 {
     font-style: italic;
 }
 
-
 #ddr_frame_topbar #firstplace {
     color: #fff;
     text-align: center;
@@ -367,10 +360,7 @@ h1, h2, h3, h4, h5 {
     font-size: 32px;
 }
 
-
-
 /* END OF DDR BAR */
-
 
 
 
@@ -406,7 +396,6 @@ h1, h2, h3, h4, h5 {
     height: calc( calc(100vh - 40px) / 8);
     overflow: hidden;
 }
-
 
 #ddr_leaderboard32 .avatar {
     width: 64px;
@@ -455,7 +444,6 @@ h1, h2, h3, h4, h5 {
     font-weight: 800;
     padding-top: 24px;
     width: 40px;
-
 }
 
 #ddr_leaderboard32 td.source {
@@ -464,7 +452,7 @@ h1, h2, h3, h4, h5 {
 
 #ddr_leaderboard32 td.pilot {
     width: 260px;
- }
+}
 
 #ddr_leaderboard32 #leaderboard_pagination {
     font-size: 46px;
@@ -509,5 +497,5 @@ h1, h2, h3, h4, h5 {
     padding-top: 24px;
 }
 
-/* END OF DDR LEADERBOARD32 */
+/* END OF FAI LEADERBOARD32 */
 

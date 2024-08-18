@@ -35,7 +35,6 @@
 
 	<link rel="stylesheet" href="/ddr_overlays/static/fonts/teko/stylesheet.css"></link>
 	<link rel="stylesheet" href="/ddr_overlays/static/fonts/inconsolata/stylesheet.css"></link>
-
 	<link rel="stylesheet" href="/ddr_overlays/static/css/ddr_overlays.css"></link>
 
 	<!-- Child template head content -->
@@ -44,6 +43,7 @@
 
 <body>
 	<script type="text/javascript" charset="utf-8">
+
 		var data_dependencies = [
 			'all_languages',
 			'language',
@@ -53,25 +53,24 @@
 			'current_heat',
 			'pilot_data'
 		];
-	
+
 		var rotorhazard;
 		var pilots;
-	
-	
+
 		rotorhazard.show_messages = false;
 		current_laps = false;
 		streamnode = {{ node_id }}
 		pilot_id = ''; //int
-	
+
 		$(document).ready(function () {
 			rotorhazard.show_messages = false;
-	
+
 			socket.on('language', function (msg) {
 				if (msg.language) {
 					rotorhazard.interface_language = msg.language;
 				}
 			});
-	
+
 			socket.on('current_heat', function (msg) {
 				for (var idx in msg.heatNodes) {
 					hn = msg.heatNodes[streamnode];
@@ -94,30 +93,30 @@
 					}
 				}
 			});
-	
+
 			socket.on('current_laps', function (msg) {
 				current_laps = msg.current;
 				show_current_laps();
 			});
-	
+
 			socket.on('race_status', function (msg) {
 				rotorhazard.event.race_status = msg;
 				show_current_laps();
 			});
-	
+
 			function show_current_laps() {
 				if (current_laps && rotorhazard.event.race_status) {
 					var i = streamnode;
 					var node_index = current_laps.node_index[streamnode];
-	
+
 					$('#pilot_current_laps tr').remove();
 					$('#pilot_current_lap_text').html('');
-	
+
 					display_laps = node_index.laps
 					while (display_laps.length > 10) {
 						display_laps.shift();
 					}
-	
+
 					$.each(display_laps, function (j, lap) { // j is loop num, lap is json object
 						var tr = '';
 						var lapTime = lap.lap_time;
@@ -135,26 +134,26 @@
 							}
 							lapTime += ')';
 						}
-	
+
 						tr = $('<tr>')
 						if (lap.lap_number == 0) {
 							tr.addClass('lap_0');
 							lap.lap_number = __('HS');
 						}
-	
+
 						if (lap.lap_index == node_index.fastest_lap_index) {
 							tr.addClass('fastest_lap');
 						}
-	
+
 						tr.append(
 							$('<td class="display_lap_number">').text(lap.lap_number + ":")
 						);
 						$time_td = $('<td>').text(lap.lap_time + ' ');
 						$local_prepend = $('<span class="from_start">');
-	
+
 						$time_td.prepend($local_prepend);
 						tr.append($time_td);
-	
+
 						if (j && lap.lap_raw < (rotorhazard.min_lap * 1000)) {
 							tr.addClass('min-lap-warning');
 						}
@@ -163,161 +162,139 @@
 						}
 						tr.appendTo('#pilot_current_laps');
 
-						//count display_laps
+						// count display_laps
 						console.log(display_laps.length);
 
-						if(display_laps.length == 0){
+						if (display_laps.length == 0) {
 							$('#pilot_current_lap_text').html('STARTING');
 						}
-						if(display_laps.length == 1){
+						if (display_laps.length == 1) {
 							$('#pilot_current_lap_text').html('First Lap');
 						}
-						if(display_laps.length == 2){
+						if (display_laps.length == 2) {
 							$('#pilot_current_lap_text').html('Second Lap');
 						}
-						if(display_laps.length == 3){
+						if (display_laps.length == 3) {
 							$('#pilot_current_lap_text').html('Third Lap');
 						}
-						if(display_laps.length == 4){
+						if (display_laps.length == 4) {
 							$('#pilot_current_lap_text').html('Fourth Lap');
 						}
-						if(display_laps.length == 5){
+						if (display_laps.length == 5) {
 							$('#pilot_current_lap_text').html('Fifth Lap');
 						}
-						if(display_laps.length == 6){
+						if (display_laps.length == 6) {
 							$('#pilot_current_lap_text').html('Sixth Lap');
 						}
-
 					});
 				}
 			}
-	
+
 			var pilotNodeImg = '';
-	
+
 			var pilot_attributes;
 			var curr_pilot_flag;
 			var country_flag;
-	
-			 /* Pilots */
+
+			/* Pilots */
 			socket.on('pilot_data', function (msg) {
-	
-					rotorhazard.event.pilot_attributes = msg.attributes;
-					rotorhazard.event.pilots = msg.pilots;
-					rotorhazard.options.pilotSort = msg.pilotSort;
-					//console.log(rotorhazard.event.pilots);
-					//load_pilots(rotorhazard);
-	
-					for (pilot in rotorhazard.event.pilots) {
-						if (rotorhazard.event.pilots[pilot].pilot_id == pilot_id) {
-							
-							//console.log(rotorhazard.event.pilots[pilot]);
-							
-							pilot = rotorhazard.event.pilots[pilot];
-							//counreyflag
-	
-							if(pilot.country){
-	
-								
-								country_upp = pilot.country;
-								//console.log(country_upp);
-	
-								country_flag = '<img class="country_flag" src="/ddr_overlays/static/imgs/flags/'+country_upp+'.jpg">';
-								$('#node_flag').html(country_flag);
-	
-	
-							}
-	
-	
-	
-							break;
+				rotorhazard.event.pilot_attributes = msg.attributes;
+				rotorhazard.event.pilots = msg.pilots;
+				rotorhazard.options.pilotSort = msg.pilotSort;
+				//console.log(rotorhazard.event.pilots);
+				//load_pilots(rotorhazard);
+
+				for (pilot in rotorhazard.event.pilots) {
+					if (rotorhazard.event.pilots[pilot].pilot_id == pilot_id) {
+
+						//console.log(rotorhazard.event.pilots[pilot]);
+
+						pilot = rotorhazard.event.pilots[pilot];
+
+						if (pilot.country) {
+							country_upp = pilot.country;
+							//console.log(country_upp);
+
+							country_flag = '<img class="country_flag" src="/ddr_overlays/static/imgs/flags/'+country_upp+'.jpg">';
+							$('#node_flag').html(country_flag);
 						}
+
+						break;
 					}
-	
+				}
 			});
-	
-			
-	
+
 			socket.on('leaderboard', function (msg) {
 				var race = msg.current.leaderboard;
-	
+
 				primary_leaderboard = race.meta.primary_leaderboard;
 				leaderboard = race[primary_leaderboard];
-	
+
 				console.log('update ha leaderboard');
 				//socket.emit('get_pilots');
-	
+
 				//socket.emit('get_data', {'load_types': 'pilot_data'});
 				$single_dependency = 'pilot_data';
 				var single_dependency = [
 					'pilot_data'
 				];
 				socket.emit('load_data', {'load_types': single_dependency});
-	
+
 				found_streamnode = false;
-	
+
 				for (var i in leaderboard) {
 					if (leaderboard[i].node == streamnode) {
 						found_streamnode = true;
-	
+
 						document.getElementById("pos").classList.remove("hidden");
-	
-	
+
 						pilot_data = leaderboard[i];
-	
+
 						pilot_id = pilot_data.pilot_id;
 						console.log(pilot_data);
-	
-						
+
 						//socket imet get pilot attributes
-	
+
 						//get_pilot_attributes
-	
-	
-	
-						if(pilot_data.position == null){
+
+						if (pilot_data.position == null) {
 							$('#node_pos').html('-');
-						}else{
-							if(pilot_data.position == 1){
+						} else {
+							if (pilot_data.position == 1) {
 								$('#node_pos').html(pilot_data.position + '<sup>st</sup>');
 							}
-							if(pilot_data.position == 2){
+							if (pilot_data.position == 2) {
 								$('#node_pos').html(pilot_data.position + '<sup>nd</sup>');
 							}
-							if(pilot_data.position == 3){
+							if (pilot_data.position == 3) {
 								$('#node_pos').html(pilot_data.position + '<sup>rd</sup>');
 							}
-							if(pilot_data.position > 3){
+							if (pilot_data.position > 3) {
 								$('#node_pos').html(pilot_data.position + '<sup>th</sup>');
 							}
 						}
-	
+
 						// $('#position').html((pilot_data.position != null ? pilot_data.position : '-'));
-	
-			
+
 						//var pilot_name_flag = country_flag + ' ' + pilot_data.callsign;
-	
-	
-						
-	
+
 						$('#node_callsign').html(pilot_data.callsign);
 						// $('#last_lap').html(pilot_data.last_lap ? pilot_data.last_lap : '0:00.000');
 						// $('#team_name').html(pilot_data.team_name);
 						// $('#laps').html(pilot_data.laps);
 						// $('#fastest_lap').html(pilot_data.fastest_lap);
-	
+
 						var pilotImg = '/static/user/avatars/' + pilot_data.callsign.replace(/ /g,"_").toLowerCase() + '.jpg';
-						
-						if(!imageExists(pilotImg)){
+
+						if (!imageExists(pilotImg)) {
 							pilotImg = '/ddr_overlays/static/imgs/no_avatar.png';
 						}
-	
-						if(pilotNodeImg !== pilotImg && pilotImg !== '/ddr_overlays/static/imgs/no_avatar.png'){
+
+						if (pilotNodeImg !== pilotImg && pilotImg !== '/ddr_overlays/static/imgs/no_avatar.png') {
 							pilotNodeImg = pilotImg;
 							document.getElementById('node_avatar_img').src = pilotImg;
-
 						}
-						
-	
+
 						if (primary_leaderboard == 'by_fastest_lap') {
 							rank_stat = pilot_data.fastest_lap
 						} else if (primary_leaderboard == 'by_consecutives') {
@@ -325,12 +302,12 @@
 						} else {
 							rank_stat = pilot_data.laps + " / " + pilot_data.total_time
 						}
-	
+
 						$('#node_rank_stat').html(rank_stat);
 						break;
 					}
 				}
-	
+
 				if (!found_streamnode) {
 					$('#node_pos').html('');
 					$('#node_callsign').html('');
@@ -342,51 +319,45 @@
 				}
 			});
 		});
-	
-	
-		function imageExists(image_url){
+
+		function imageExists(image_url) {
 			var http = new XMLHttpRequest();
 			http.open('HEAD', image_url, false);
 			http.send();
 			return http.status != 404;
 		}
-	
-	
+
 		function pilot_attributes(rotorhazard) {
 			for (var i in rotorhazard.event.pilots) {
 				var pilot = rotorhazard.event.pilots[i];
 				if (pilot.pilot_id != 0) {
-				pilot.attributes = [];
-				for (var attr_idx in rotorhazard.event.pilot_attributes) {
-					var pilot_attr = rotorhazard.event.pilot_attributes[attr_idx];
-					if (pilot[pilot_attr.name] != undefined) {
-					pilot_attr.value = pilot[pilot_attr.name];
-					} else {
-					pilot_attr.value = '';
+					pilot.attributes = [];
+					for (var attr_idx in rotorhazard.event.pilot_attributes) {
+						var pilot_attr = rotorhazard.event.pilot_attributes[attr_idx];
+						if (pilot[pilot_attr.name] != undefined) {
+							pilot_attr.value = pilot[pilot_attr.name];
+						} else {
+							pilot_attr.value = '';
+						}
+						var pilot_attr_name = pilot_attr.name;
+						var attr_object = { name: pilot_attr_name, value: pilot_attr.value };
+						//pilot.attributes.push(attr_object);
+						pilot.attributes[pilot_attr_name] = attr_object;
 					}
-					var pilot_attr_name = pilot_attr.name;
-					var attr_object = { name: pilot_attr_name, value: pilot_attr.value };
-					//pilot.attributes.push(attr_object);
-					pilot.attributes[pilot_attr_name] = attr_object;
-				}
 				}
 			}
 		}
-	
-	
-	
+
 		function load_pilots(rotorhazard) {
-				var pilotlist_html = '';
-	
-				pilot_attributes(rotorhazard);
-	
-				console.log(rotorhazard.event.pilots);
-	
+			var pilotlist_html = '';
+
+			pilot_attributes(rotorhazard);
+
+			console.log(rotorhazard.event.pilots);
 		}
-	
+
 	</script>
-		
-	
+
 	<div id="ddr_node">
 
 		<div id="node_avatar">
@@ -397,14 +368,12 @@
 			<div id="node_pos"></div>
 		</div>
 
-
 		<div id="node_info_bar">
-			
+
 			<div id="node_avatar_spacer"></div>
 			<div id="node_flag"></div>
 			<div id="node_callsign"></div>
 			<div id="node_team_name"></div>
-
 
 			<div id="node_race_stats">
 				<div id="node_rank_stat"></div>
@@ -412,57 +381,44 @@
 
 			<div id="node_position_spacer"></div>
 
-
 		</div>
 
 		<div id="pilot_current_laps">
-	
+
 		</div>
 
 		<div id="pilot_current_lap_text">
-			
+
 		</div>
-		
-		
 
 	</div>
 
-
-	
-
-	
 	<div id="pilot_rank">
 		<div id="pilot_rank_stat"></div>
 	</div>
-	
-	
 
-
-	
-	
 	<main class="page-streamnode" style="display: none;">
-	
+
 		<div id="pilot_img"></div>
-	
+
 		<div id="pilot_info">
 			<div id="callsign"></div>
 			<div id="rank_stat"></div>
 		</div>
-	
+
 		<!--<div id="position"></div>-->
 		<!--<div id="pilot-info">-->
 			<!--<div id="callsign"></div>-->
 			<!--<div id="rank_stat"></div>-->
 		<!--</div>-->
 		<div id="current-laps"></div>
-	
+
 		<div id="pos">
 			<div id="position"></div>
 		</div>
-	
-	</main>
-	
 
-	</body>
+	</main>
+
+</body>
 
 </html>

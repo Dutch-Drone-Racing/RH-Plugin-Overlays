@@ -29,7 +29,7 @@ Pilot avatars are obtained from the `/server/static/user/avatars/`  folder. The 
 A country can be set as pilot attribute in the pilots tab (dropdown). When set it shows the flag icon before the pilot's callsign.
 
 ### Brackets
-For now only the top 32 double-elimination brackets are supported. (FAI, 4-up, 32-pilot) Others will follow.
+For now supported brackets are FAI top 32 double-elimination (FAI, 4-up, 32-pilot) and MultiGP top 16 double-elimination (MultiGP, 4-up, 16-pilot). Others will follow.
 
 The advice is to load the whole page as 1 source in OBS and then make 2 scenes, one for the Winner Bracket and one for the Lower Bracket and crop the source accordingly. This way you can easily switch between the two.
 
