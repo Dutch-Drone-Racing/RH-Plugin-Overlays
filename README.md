@@ -12,6 +12,8 @@ Stream overlays for RotorHazard as a plugin. You can use these in OBS or any oth
 - Leaderboard - Top 32 Pilots
 - Leaderboard - Top 32 Pilots / 4 pages
 - Brackets 32 Double-Elimination FAI
+- Brackets 16 Double-Elimination MultiGP
+- 'Last Heat' display
 
 ## Installation
 Download the latest release and put the **ddr_overlays** folder in the **plugins** folder of your RotorHazard installation. (Re-)Start your RotorHazard server.
