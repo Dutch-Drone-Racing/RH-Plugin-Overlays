@@ -6,7 +6,7 @@ h1, h2, h3, h4, h5 {
 
 
 
-/* DDR NEXT UP */
+/* DDR NEXT UP / LAST HEAT */
 
 #ddr_nextup {
     background-color: #000000DC;
@@ -41,6 +41,38 @@ h1, h2, h3, h4, h5 {
     font-family: teko, Arial, Helvetica, sans-serif;
 }
 
+.table {
+    display: table;
+    width: 100%;
+    padding: 0 0 22px 0;
+    justify-content: center;
+}
+
+.table-row {
+    display: table-row;
+    width: 1400px;
+    justify-content: center;
+}
+
+.table-cell {
+    display: table-cell;
+    width: 50%;
+    justify-content: center;
+    vertical-align: middle;
+    font-size: 42px;
+    font-weight: 400;
+    text-align: center;
+    font-family: teko, Arial, Helvetica, sans-serif;
+}
+
+#winner-cell {
+    padding-left: 14%;
+}
+
+#lower-cell {
+    padding-right: 14%;
+}
+
 #ddr_nextup #nextup_pilot_box {
     width: 1400px;
     height: 440px;
@@ -57,6 +89,13 @@ h1, h2, h3, h4, h5 {
     margin: 0 12px;
 }
 
+#ddr_nextup .nextup_pilot_position {
+    width: 100%;
+    text-align: center;
+    font-size: 42px;
+    margin-bottom: 8px;
+    font-family: teko, Arial, Helvetica, sans-serif;
+}
 
 #ddr_nextup .nextup_pilot_avatar {
     width: 100%;
@@ -109,9 +148,7 @@ h1, h2, h3, h4, h5 {
     object-fit: cover;
 }
 
-/* END OF DDR NEXT UP */
-
-
+/* END OF DDR NEXT UP / LAST HEAT */
 
 
 

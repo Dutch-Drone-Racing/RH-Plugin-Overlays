@@ -1,5 +1,5 @@
 /* Leaderboards */
-function build_fai_nextup(leaderboard, display_type, meta, display_starts=false) {
+function build_fai_nextup(leaderboard, display_type, meta, show_position=false) {
 	if (typeof(display_type) === 'undefined') {
 		var display_type = 'by_race_time';
 	}
@@ -21,7 +21,13 @@ function build_fai_nextup(leaderboard, display_type, meta, display_starts=false)
 			pilotImg = '/ddr_overlays/static/imgs/no_avatar.png';
 		}
 
-		var html = '<div class="nextup_pilot"><div class="nextup_pilot_avatar"><div class="nextup_pilot_avatar_mask"><img src="'+pilotImg+'" alt="Avatar"></div></div><div class="nextup_pilot_flag"><div class="nextup_pilot_flag_mask"><img src="/ddr_overlays/static/imgs/flags/'+flag+'.jpg"></div></div><div class="nextup_pilot_name">'+pilot_name+'</div></div>';
+		let html = '<div class="nextup_pilot">';
+		if (show_position) {
+			let position_strings = ["1st", "2nd", "3rd", "4th"];
+			html += '<div class="nextup_pilot_position">'+position_strings[i]+'</div>';
+			$('#nextup_pilot_box').height(480);  // give more space to show positions (overriding CSS)
+		}
+		html += '<div class="nextup_pilot_avatar"><div class="nextup_pilot_avatar_mask"><img src="'+pilotImg+'" alt="Avatar"></div></div><div class="nextup_pilot_flag"><div class="nextup_pilot_flag_mask"><img src="/ddr_overlays/static/imgs/flags/'+flag+'.jpg"></div></div><div class="nextup_pilot_name">'+pilot_name+'</div></div>';
 
 		$('#nextup_pilot_box').append(html);
 
