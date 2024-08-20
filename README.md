@@ -13,7 +13,8 @@ Stream overlays for RotorHazard as a plugin. You can use these in OBS or any oth
 - Leaderboard - Top 32 Pilots / 4 pages
 - Brackets 32 Double-Elimination FAI
 - Brackets 16 Double-Elimination MultiGP
-- 'Last Heat' display
+- 'Last Heat' display (32 Double-Elimination FAI)
+- 'Last Heat' display (16 Double-Elimination MultiGP)
 
 ## Installation
 Download the latest release and put the **ddr_overlays** folder in the **plugins** folder of your RotorHazard installation. (Re-)Start your RotorHazard server.
@@ -31,7 +32,7 @@ Pilot avatars are obtained from the `/server/static/user/avatars/`  folder. The 
 A country can be set as pilot attribute in the pilots tab (dropdown). When set it shows the flag icon before the pilot's callsign.
 
 ### Brackets
-For now supported brackets are FAI top 32 double-elimination (FAI, 4-up, 32-pilot) and MultiGP top 16 double-elimination (MultiGP, 4-up, 16-pilot). Others will follow.
+For now supported brackets are 32 double-elimination (FAI, 4-up, 32-pilot) and 16 double-elimination (MultiGP, 4-up, 16-pilot). Others will follow.
 
 The advice is to load the whole page as 1 source in OBS and then make 2 scenes, one for the Winner Bracket and one for the Lower Bracket and crop the source accordingly. This way you can easily switch between the two.
 
