@@ -75,10 +75,10 @@ def initialize(rhapi):
             bracket_type=bracket_type, numb_pilots=numb_pilots, class_title=class_title
         )
 
-    @bp.route('/ddr_overlays/stream/last_heat/<int:numb_pilots>')
-    def ddr_overlays_streamLastHeat(numb_pilots):
+    @bp.route('/ddr_overlays/stream/last_heat/<int:numb_pilots>/<string:class_title>')
+    def ddr_overlays_streamLastHeat(numb_pilots, class_title):
         return templating.render_template('stream/last_heat.html', serverInfo=None, getOption=rhapi.db.option, __=rhapi.__, DEBUG=False,
-            numb_pilots=numb_pilots
+            numb_pilots=numb_pilots, class_title=class_title
         )
 
     rhapi.ui.blueprint_add(bp)

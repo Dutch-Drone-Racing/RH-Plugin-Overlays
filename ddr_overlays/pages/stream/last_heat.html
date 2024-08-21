@@ -52,8 +52,8 @@
 		'pilot_data',
 		'result_data',
 		'leaderboard',
-		'race_status',
-		'heat_data'
+		'class_data',
+		'race_status'
 	];
 
 	rotorhazard.show_messages = false;
@@ -63,6 +63,9 @@
 	var resume_check = true;
 
 	var ddr_pilots;
+	var ddr_race_data;
+	var ddr_heat_data;
+	var ddr_class_data;
 
 	function race_kickoff(msg) {
 		rotorhazard.timer.stopAll();
@@ -174,6 +177,23 @@
 			ddr_pilots = msg.pilots;	
 		});	
 
+		socket.on('result_data', function (msg) {
+			ddr_race_data = msg;
+			//console.log(ddr_race_data);
+			//display_result_data(result_data);
+		});
+
+		socket.on('class_data', function (msg) {
+			ddr_class_data = msg.classes;
+
+			Object.values(ddr_class_data).forEach(race_class => {
+				if (race_class.name === race_class_title) {
+					console.log(race_class);
+					race_class_id = race_class.id;
+				}
+			});
+		});
+
 		socket.on('race_status', function (msg) {
 			switch (msg.race_status) {
 				case 1: // Race running
@@ -225,12 +245,20 @@
 				var race = msg.current;
 			}
 
-			var race_string = /Race \d+/.exec(race.displayname);
-			if (race_string != null) {
-				// race.heat is not reliable because it considers also practice and qualifying heats
-				// parse race.displayname instead
-				var heat = /\d+/.exec(race_string[0])[0];
+			var heat = 0;
+			if (ddr_race_data != undefined) {
+				// reason for this: race.heat counts heats of every class
+				// we need the heat number inside the current class
+				var eliminations_heats = ddr_race_data.heats_by_class[race_class_id];
+				for (let i = 0; i < eliminations_heats.length; i++) {
+					const this_heat = eliminations_heats[i];
+					if (eliminations_heats[i] == race.heat) {
+						heat = i+1;
+					}
+				}
+			}
 
+			if (heat != 0) {
 				$('.curr_heat_title').html(race.displayname);
 
 				leaderboard_type = race.leaderboard.meta.primary_leaderboard;
@@ -346,6 +374,8 @@
 
 	function speak(obj, priority) {} // stub to prevent crashing
 
+	let race_class_id;
+	let race_class_title = '{{ class_title }}';
 	let race_numb_pilots = '{{ numb_pilots }}';
 
 </script>
