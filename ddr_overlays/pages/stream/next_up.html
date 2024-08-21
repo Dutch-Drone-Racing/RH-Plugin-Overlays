@@ -36,7 +36,6 @@
 	<link rel="stylesheet" href="/ddr_overlays/static/fonts/teko/stylesheet.css"></link>
 	<link rel="stylesheet" href="/ddr_overlays/static/css/ddr_overlays.css"></link>
 
-
 	<!-- Child template head content -->
 
 </head>
@@ -47,16 +46,7 @@
 
 <script type="text/javascript" charset="utf-8">
 
-    /*
 	var data_dependencies = [
-		'all_languages',
-		'language',
-		'pilot_data',
-		'leaderboard',
-		'race_status',
-	]; */
-
-    var data_dependencies = [
 		'all_languages',
 		'language',
 		'pilot_data',
@@ -111,8 +101,6 @@
 			}
 		});
 
-
-
 		socket.on('pilot_data', function (msg) {
 			rotorhazard.event.pilot_attributes = msg.attributes;
 			rotorhazard.event.pilots = msg.pilots;
@@ -120,21 +108,17 @@
 			ddr_pilots = msg.pilots;	
 		});	
 
-
 		socket.on('heartbeat', function (msg) {
 		});
 
 		socket.on('leaderboard', function (msg) {
-	
 			var race = msg.current;
-
 
 			$('.curr_heat_title').html(race.displayname);
 
 			leaderboard_type = race.leaderboard.meta.primary_leaderboard;
 			$('#nextup_pilot_box').empty();
 			build_fai_nextup(race.leaderboard[leaderboard_type], 'current', race.leaderboard.meta);
-			
 		});
 
 		socket.on('prestage_ready', function (msg) {
@@ -148,60 +132,50 @@
 		socket.on('stop_timer', function (msg) {
 			rotorhazard.timer.stopAll();
 		});
-
-		
 	});
 
 	function speak(obj, priority) {} // stub to prevent crashing
 
-
-	
-
 </script>
 
 <main class="page-stream">
-	
 
-    <div id="ddr_nextup">
+	<div id="ddr_nextup">
 
 		<div id="nextup_title">
 			Next Up:
 		</div>
 
-        <div id="title">
-            <span class="curr_heat_title"></span> - 
-            <span class="curr_event_name">{{ getOption('eventName') }}</span>
-        </div>
+		<div id="title">
+			<span class="curr_heat_title"></span> - 
+			<span class="curr_event_name">{{ getOption('eventName') }}</span>
+		</div>
 
+		<div id="nextup_pilot_box">
 
-        <div id="nextup_pilot_box">
+			<div class="nextup_pilot">
 
-            <div class="nextup_pilot">
-
-                <div class="nextup_pilot_avatar">
-                    <div class="nextup_pilot_avatar_mask">
-                        <img src="/ddr/static/imgs/no-avatar.webp" alt="Avatar">
-                    </div>
-                </div>
+				<div class="nextup_pilot_avatar">
+					<div class="nextup_pilot_avatar_mask">
+						<img src="/ddr/static/imgs/no-avatar.webp" alt="Avatar">
+					</div>
+				</div>
 
 				<div class="nextup_pilot_flag">
-                    <div class="nextup_pilot_flag_mask">
-                        <img src="/ddr/static/imgs/flags/nl.jpg">
-                    </div>
-                </div>
+					<div class="nextup_pilot_flag_mask">
+						<img src="/ddr/static/imgs/flags/nl.jpg">
+					</div>
+				</div>
 
-                <div class="nextup_pilot_name">
-                    MCK FPV
-                </div>
+				<div class="nextup_pilot_name">
+					MCK FPV
+				</div>
 
-            </div>
+			</div>
 
-        </div>
+		</div>
 
-
-    </div>
-
-
+	</div>
 
 	<div id="race_lb">
 
@@ -218,11 +192,9 @@
 
 	</div>
 
-
 </div>
 
 </main>
-
 
 </body>
 

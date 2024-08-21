@@ -6,7 +6,7 @@ h1, h2, h3, h4, h5 {
 
 
 
-/* DDR NEXT UP */
+/* DDR NEXT UP / LAST HEAT */
 
 #ddr_nextup {
     background-color: #000000DC;
@@ -41,6 +41,38 @@ h1, h2, h3, h4, h5 {
     font-family: teko, Arial, Helvetica, sans-serif;
 }
 
+.table {
+    display: table;
+    width: 100%;
+    padding: 0 0 22px 0;
+    justify-content: center;
+}
+
+.table-row {
+    display: table-row;
+    width: 1400px;
+    justify-content: center;
+}
+
+.table-cell {
+    display: table-cell;
+    width: 50%;
+    justify-content: center;
+    vertical-align: middle;
+    font-size: 42px;
+    font-weight: 400;
+    text-align: center;
+    font-family: teko, Arial, Helvetica, sans-serif;
+}
+
+#winner-cell {
+    padding-left: 14%;
+}
+
+#lower-cell {
+    padding-right: 14%;
+}
+
 #ddr_nextup #nextup_pilot_box {
     width: 1400px;
     height: 440px;
@@ -50,7 +82,6 @@ h1, h2, h3, h4, h5 {
     flex-wrap: wrap;
 }
 
-
 #ddr_nextup .nextup_pilot {
     /*min-width: 300px;*/
     height: 600px;
@@ -58,6 +89,13 @@ h1, h2, h3, h4, h5 {
     margin: 0 12px;
 }
 
+#ddr_nextup .nextup_pilot_position {
+    width: 100%;
+    text-align: center;
+    font-size: 42px;
+    margin-bottom: 8px;
+    font-family: teko, Arial, Helvetica, sans-serif;
+}
 
 #ddr_nextup .nextup_pilot_avatar {
     width: 100%;
@@ -110,9 +148,7 @@ h1, h2, h3, h4, h5 {
     object-fit: cover;
 }
 
-/* END OF DDR NEXT UP */
-
-
+/* END OF DDR NEXT UP / LAST HEAT */
 
 
 
@@ -156,7 +192,6 @@ h1, h2, h3, h4, h5 {
     float: left;
     height: 60px;
     padding: 0 12px;
-    
     font-size: 28px;
 }
 
@@ -177,7 +212,7 @@ h1, h2, h3, h4, h5 {
 
 }
 
-#ddr_node #node_info_bar #node_race_stats{
+#ddr_node #node_info_bar #node_race_stats {
     float: right;
     margin-right: 140px;
 }
@@ -187,7 +222,6 @@ h1, h2, h3, h4, h5 {
     line-height: 1;
     padding-top: 10px;
 }
-
 
 #ddr_node #node_info_bar #node_callsign {
     font-size: 40px;
@@ -254,7 +288,6 @@ h1, h2, h3, h4, h5 {
     padding: 0;
     color: #fff;
     font-family: teko, Arial, Helvetica, sans-serif;
-
 }
 
 /* END OF DDR NODE */
@@ -291,7 +324,6 @@ h1, h2, h3, h4, h5 {
     font-family: 'Courier New', Courier, monospace;
     text-transform: uppercase;
     font-style: italic;
-
 }
 
 #ddr_frame_topbar .race-running .timing-clock {
@@ -309,7 +341,6 @@ h1, h2, h3, h4, h5 {
     background-color: #00000000;
     color: orange;
     background-color: rgba(93, 60, 0, 0.701);
-
 }
 
 #ddr_frame_topbar #block_center {
@@ -342,7 +373,6 @@ h1, h2, h3, h4, h5 {
     font-style: italic;
 }
 
-
 #ddr_frame_topbar #firstplace {
     color: #fff;
     text-align: center;
@@ -367,10 +397,7 @@ h1, h2, h3, h4, h5 {
     font-size: 32px;
 }
 
-
-
 /* END OF DDR BAR */
-
 
 
 
@@ -406,7 +433,6 @@ h1, h2, h3, h4, h5 {
     height: calc( calc(100vh - 40px) / 8);
     overflow: hidden;
 }
-
 
 #ddr_leaderboard32 .avatar {
     width: 64px;
@@ -455,7 +481,6 @@ h1, h2, h3, h4, h5 {
     font-weight: 800;
     padding-top: 24px;
     width: 40px;
-
 }
 
 #ddr_leaderboard32 td.source {
@@ -464,7 +489,7 @@ h1, h2, h3, h4, h5 {
 
 #ddr_leaderboard32 td.pilot {
     width: 260px;
- }
+}
 
 #ddr_leaderboard32 #leaderboard_pagination {
     font-size: 46px;
@@ -509,5 +534,5 @@ h1, h2, h3, h4, h5 {
     padding-top: 24px;
 }
 
-/* END OF DDR LEADERBOARD32 */
+/* END OF FAI LEADERBOARD32 */
 
