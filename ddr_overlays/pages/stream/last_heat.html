@@ -7,7 +7,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="RotorHazard">
 	<meta name="google" content="notranslate">
-	<title>Stream Top Bar - {{ getOption("timerName") }}</title>
+	<title>Stream Node</title>
 
 	<!-- Icons -->
 	<link rel="apple-touch-icon" sizes="180x180" href="/static/image/apple-touch-icon.png">
@@ -31,8 +31,8 @@
 
 	<!-- CSS -->
 	<link rel="stylesheet" href="/static/magnific-1.1.0/magnific-popup.css"></link>
-
 	<link rel="stylesheet" href="/static/stream.css"></link>
+
 	<link rel="stylesheet" href="/ddr_overlays/static/fonts/teko/stylesheet.css"></link>
 	<link rel="stylesheet" href="/ddr_overlays/static/css/ddr_overlays.css"></link>
 
@@ -42,26 +42,30 @@
 
 <body>
 
+<script type="text/javascript" charset="utf-8" src="/ddr_overlays/static/js/ddr_overlays.js"></script>
+
 <script type="text/javascript" charset="utf-8">
 
 	var data_dependencies = [
 		'all_languages',
 		'language',
-		'leaderboard',
-		'race_status',
+		'pilot_data',
 		'result_data',
+		'leaderboard',
+		'class_data',
+		'race_status'
 	];
-
-	var rotorhazard;
 
 	rotorhazard.show_messages = false;
 
 	var request_time;
 	var request_pi_time;
 	var resume_check = true;
-	var result_data;
 
-	var streamclass;
+	var ddr_pilots;
+	var ddr_race_data;
+	var ddr_heat_data;
+	var ddr_class_data;
 
 	function race_kickoff(msg) {
 		rotorhazard.timer.stopAll();
@@ -70,7 +74,7 @@
 		var race_start_pi = (msg.pi_starts_at_s * 1000); // convert seconds (pi) to millis (JS)
 
 		rotorhazard.timer.race.hidden_staging = Boolean(msg.hide_stage_timer);
-		rotorhazard.timer.race.count_up = Boolean(msg.race_mode);
+		rotorhazard.timer.race.count_up = Boolean(msg.unlimited_time);
 		rotorhazard.timer.race.duration_tenths = msg.race_time_sec * 10;
 
 		rotorhazard.timer.race.start(race_start_pi, staging_start_pi);
@@ -81,30 +85,8 @@
 		rotorhazard.pi_time_request = window.performance.now();
 		socket.emit('get_pi_time');
 
-		socket.emit('load_data', {'load_types': [
-			'current_heat',
-		]});
-
-		socket.on('current_heat', function (msg) {
-
-			console.log('show it');
-			console.log(msg.heat_class);
-
-			if (msg.heat_class) {
-				streamclass = msg.heat_class;
-				console.log(streamclass)
-				if (result_data != '134abd') {
-					var cur_classname = displayClassName(streamclass, rotorhazard);
-					console.log(cur_classname);
-
-					//var current_class = msg.classes[class_id];
-					$('#class_name').html(class_name);
-				}
-			}
-
-		});
-
 		socket.on('pi_time', function (msg) {
+			var max_samples = 10;
 			var response_time = window.performance.now();
 			var server_delay = response_time - rotorhazard.pi_time_request;
 			var server_oneway = server_delay ? server_delay / 2 : server_delay;
@@ -154,7 +136,23 @@
 			for (var i in rotorhazard.server_time_differential_samples) {
 				a = Math.min(a, rotorhazard.server_time_differential_samples[i].response);
 			}
-			$('#server-lag').html('<p>Sync quality: within ' + a + 'ms (' + rotorhazard.server_time_differential_samples.length + ' samples)</p>');
+			rotorhazard.sync_within = Math.ceil(a);
+
+			/*
+			$('#server-lag').html('<p>Sync quality: within ' + rotorhazard.sync_within + 'ms (' + rotorhazard.server_time_differential_samples.length + '/' + max_samples + ' samples)</p>');
+
+			if (
+				(max_samples >= 10 && SYNC_WARNING_THRESHOLD_10 > rotorhazard.sync_within) ||
+				(max_samples >= 3 && SYNC_WARNING_THRESHOLD_3 > rotorhazard.sync_within) ||
+				SYNC_WARNING_THRESHOLD_1 > rotorhazard.sync_within) {
+				rotorhazard.has_server_sync = true;
+				if (!rotorhazard.timer.running()) {
+					$('.timing-clock .warning').hide();
+				}
+			} else {
+				$('.timing-clock .warning .value').text(rotorhazard.sync_within + 'ms');
+			}
+			*/
 		});
 
 		socket.on('language', function (msg) {
@@ -170,6 +168,30 @@
 			} else {
 				rotorhazard.timer.deferred.stop();
 			}
+		});
+
+		socket.on('pilot_data', function (msg) {
+			rotorhazard.event.pilot_attributes = msg.attributes;
+			rotorhazard.event.pilots = msg.pilots;
+			rotorhazard.options.pilotSort = msg.pilotSort;
+			ddr_pilots = msg.pilots;	
+		});	
+
+		socket.on('result_data', function (msg) {
+			ddr_race_data = msg;
+			//console.log(ddr_race_data);
+			//display_result_data(result_data);
+		});
+
+		socket.on('class_data', function (msg) {
+			ddr_class_data = msg.classes;
+
+			Object.values(ddr_class_data).forEach(race_class => {
+				if (race_class.name === race_class_title) {
+					console.log(race_class);
+					race_class_id = race_class.id;
+				}
+			});
 		});
 
 		socket.on('race_status', function (msg) {
@@ -223,35 +245,117 @@
 				var race = msg.current;
 			}
 
-			//showN1Pilot(msg);
-
-			//console.log(rotorhazard);
-
-			var heatname = __('Heat') + ' ' + race.heat;
-			if (race.displayname) {
-				heatname = race.displayname;
+			var heat = 0;
+			if (ddr_race_data != undefined) {
+				// reason for this: race.heat counts heats of every class
+				// we need the heat number inside the current class
+				var eliminations_heats = ddr_race_data.heats_by_class[race_class_id];
+				for (let i = 0; i < eliminations_heats.length; i++) {
+					const this_heat = eliminations_heats[i];
+					if (eliminations_heats[i] == race.heat) {
+						heat = i+1;
+					}
+				}
 			}
 
-			$('.curr_heat_Title').html(heatname);
+			if (heat != 0) {
+				$('.curr_heat_title').html(race.displayname);
 
-			leaderboard_type = race.leaderboard.meta.primary_leaderboard;
-			$('#leaderboard').empty();
-			$('#leaderboard').append(build_leaderboard(race.leaderboard[leaderboard_type], 'current', race.leaderboard.meta));
+				leaderboard_type = race.leaderboard.meta.primary_leaderboard;
 
-			$('#team_leaderboard').empty();
-			if (race.team_leaderboard && 'meta' in race.team_leaderboard) {
-				leaderboard_type = race.team_leaderboard.meta.primary_leaderboard;
-				$('#team_leaderboard').append(build_team_leaderboard(race.team_leaderboard[leaderboard_type], leaderboard_type, race.team_leaderboard.meta));
-				$('#team_leaderboard').show();
-			} else {
-				$('#team_leaderboard').hide();
-			}
+				$('#nextup_pilot_box').empty();
+				var FINISHED = true;
+				for (var i in race.leaderboard[leaderboard_type]) {
+					if (race.leaderboard[leaderboard_type][i].position == null) {
+						FINISHED = false;
+					}
+				}
 
-			if (race.status_msg) {
-				$('.race_status_message').html(race.status_msg);
-				$('.race_status_message').slideDown();
-			} else {
-				$('.race_status_message').slideUp();
+				if (FINISHED) {
+					build_fai_nextup(race.leaderboard[leaderboard_type], 'current', race.leaderboard.meta, true);
+
+					/*                       0                   1                      2          */
+					var template_strings = ["Advance to Race ", "Go to Lower Bracket", "Eliminated"];
+					if (race_numb_pilots == 16) {
+						// double elimination, 16 pilots, MultiGP
+						let each_heat_brings_to = {
+							"1": [6, 1],   // winners of heat 1 advance to race 6 and losers of heat 1 go to template_strings[1] (= lower bracket)
+							"2": [6, 1],
+							"3": [8, 1],
+							"4": [8, 1],
+							"5": [9, 2],   // winners of heat 5 advance to race 9 and losers of heat 5 go to template_strings[2] (= eliminated)
+							"6": [11, 1],
+							"7": [10, 2],
+							"8": [11, 1],
+							"9": [12, 2],
+							"10": [12, 2],
+							"11": [14, 1],
+							"12": [13, 2],
+							"13": [14, 2]
+						}
+
+						if (heat >= 14) {
+							// final heat
+							$('#winner-cell').empty();
+							$('#lower-cell').empty();
+						} else {
+							$('#winner-cell').text(template_strings[0] + each_heat_brings_to[heat][0]);
+							$('#lower-cell').text(template_strings[ each_heat_brings_to[heat][1] ]);
+						}
+					} else if (race_numb_pilots == 32) {
+						// double elimination, 32 pilots, FAI
+
+						// we can't use the same technique as in MultiGP because the winners of lower brackets sometimes advance to different heats
+						// so just say that they advance without specifying to which heat :)
+						let each_heat_brings_to = {
+							"1": [0, 1],
+							"2": [0, 1],
+							"3": [0, 1],
+							"4": [0, 1],
+							"5": [0, 1],
+							"6": [0, 1],
+							"7": [0, 1],
+							"8": [0, 1],
+							"9": [0, 1],
+							"10": [0, 1],
+							"11": [0, 1],
+							"12": [0, 1],
+							"13": [0, 2],
+							"14": [0, 2],
+							"15": [0, 2],
+							"16": [0, 2],
+							"17": [0, 2],
+							"18": [0, 2],
+							"19": [0, 2],
+							"20": [0, 2],
+							"21": [0, 2],
+							"22": [0, 2],
+							"23": [0, 1],
+							"24": [0, 1],
+							"25": [0, 2],
+							"26": [0, 2],
+							"27": [0, 2],
+							"28": [0, 1],
+							"29": [0, 2],
+						}
+
+						if (heat >= 30) {
+							// final heat
+							$('#winner-cell').empty();
+							$('#lower-cell').empty();
+						} else {
+							let is_winner_bracket = (each_heat_brings_to[heat][1] == 1);
+							if (heat == 28 || heat == 29) {
+								$('#winner-cell').text("Advance to Final");
+							} else if (is_winner_bracket) {
+								$('#winner-cell').text("Advance to Winner Bracket");
+							} else {
+								$('#winner-cell').text("Advance to Lower Bracket");
+							}
+							$('#lower-cell').text(template_strings[ each_heat_brings_to[heat][1] ]);
+						}
+					}
+				}
 			}
 		});
 
@@ -266,95 +370,82 @@
 		socket.on('stop_timer', function (msg) {
 			rotorhazard.timer.stopAll();
 		});
-
-		socket.on('result_data', function (msg) {
-			result_data = msg;
-			//showN1Pilot(result_data);
-		});
-
 	});
 
 	function speak(obj, priority) {} // stub to prevent crashing
 
-	function showN1Pilot(msg) {
-		//console.log('show N1 Pilot: ');
-		let n1PilotTag = msg.event_leaderboard.by_consecutives[0].callsign;
-		//console.log(n1PilotTag);
-		//console.log(msg);
-
-		$('#n1PilotTag').html(n1PilotTag);
-	}
-
-	function displayClassName(streamclass, msg) {
-		console.log('msg is ' + streamclass);
-		console.log(msg);
-		if (!$.isEmptyObject(msg.heats)) {
-			for (var class_id in msg.heats_by_class) {
-				if (class_id == streamclass) {
-					var current_class = msg.classes[class_id];
-					if (current_class) {
-						//console.log(current_class);
-						if (current_class.name) {
-							class_name = current_class.name;
-						} else {
-							class_name = __('Class') + ' ' + current_class.id;
-						}
-
-						return class_name;
-					}
-				}
-			}
-		} else {
-			return '';
-		}
-	}
+	let race_class_id;
+	let race_class_title = '{{ class_title }}';
+	let race_numb_pilots = '{{ numb_pilots }}';
 
 </script>
 
-<script>
-	document.addEventListener("DOMContentLoaded", function() {
-		function getUrlParameter(name) {
-			name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-			var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-			var results = regex.exec(location.search);
-			return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-		}
+<main class="page-stream">
 
-		if (getUrlParameter('nologo') === '1') {
-			var logoElement = document.getElementById('logo');
-			if (logoElement) {
-				logoElement.style.display = 'none';
-			}
-		}
-	});
-</script>
+	<div id="ddr_nextup">
 
-<main id="ddr_frame_topbar_main">
+		<div id="nextup_title">
+			Results:
+		</div>
 
-	<div id="ddr_frame_topbar">
+		<div id="title">
+			<span class="curr_heat_title"></span> - 
+			<span class="curr_event_name">{{ getOption('eventName') }}</span>
+		</div>
 
-		<div id="block_left">
-			<div id="timer">
-				<div class="timing-clock"><div class="time-display">--:--</div></div>
+		<div class="table">
+			<div class="table-row">
+				<div class="table-cell bracket" id="winner-cell">Winner Bracket</div>
+				<div class="table-cell bracket" id="lower-cell">Lower Bracket</div>
 			</div>
 		</div>
 
-		<div id="block_center">
-			<div id="heatTitle" class="current_heat"><span class="curr_heat_Title">{{ __('Loading...') }} </span><span id="class_name"></span> | <span id="event_Title"> {{ getOption('eventName') }}</span></div>
-		</div>
+		<div id="nextup_pilot_box">
 
-		<div id="block_right">
+			<div class="nextup_pilot">
 
-			<img id="logo" src="/ddr_overlays/static/imgs/ddr_logo_white.png" height="54px" style="float: right; margin-right: 10px; margin-top: 2px;">
-			<!--
-			<div id="firstplace">
-				<img src="/fpvscores/static/assets/imgs/icons/trophy.svg"> <span id="n1PilotTag"></span>
+				<div class="nextup_pilot_position">
+					1st
+				</div>
+
+				<div class="nextup_pilot_avatar">
+					<div class="nextup_pilot_avatar_mask">
+						<img src="/ddr/static/imgs/no-avatar.webp" alt="Avatar">
+					</div>
+				</div>
+
+				<div class="nextup_pilot_flag">
+					<div class="nextup_pilot_flag_mask">
+						<img src="/ddr/static/imgs/flags/nl.jpg">
+					</div>
+				</div>
+
+				<div class="nextup_pilot_name">
+					MCK FPV
+				</div>
+
 			</div>
-			-->
+
 		</div>
+
 	</div>
 
-	<!--<div class="race_status_message"></div>-->
+	<div id="race_lb">
+
+		<!--
+		<div class="race_lb_pilot">
+			<div class="pilot_flag">
+				<img src="http://localhost:5050/fpvscores/static/assets/imgs/flags/pl.jpg" alt="PL" height="32px">
+			</div>
+			<div class="pilot_pos">1.</div>
+			<div class="pilot_name">JesseFPV</div>
+			<div class="pilot_score">00:34.129</div>
+		</div>
+		-->
+
+	</div>
+
+</div>
 
 </main>
 

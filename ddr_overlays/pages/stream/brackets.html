@@ -46,25 +46,15 @@
 
 <script type="text/javascript" charset="utf-8" src="/ddr_overlays/static/js/ddr_overlays.js"></script>
 
-
 <script type="text/javascript" charset="utf-8">
 
-    /*
 	var data_dependencies = [
 		'all_languages',
 		'language',
 		'pilot_data',
 		'leaderboard',
-		'race_status',
-	]; */
-
-    var data_dependencies = [
-		'all_languages',
-		'language',
-		'pilot_data',
-		'leaderboard',
-        'class_data',
-        'result_data'
+		'class_data',
+		'result_data'
 	];
 
 	rotorhazard.show_messages = false;
@@ -74,11 +64,11 @@
 	var resume_check = true;
 
 	var ddr_pilots;
-    var ddr_race_data;
-    var ddr_heat_data;
-    var ddr_class_data;
+	var ddr_race_data;
+	var ddr_heat_data;
+	var ddr_class_data;
 
-    var last_refresh;
+	var last_refresh;
 
 	function race_kickoff(msg) {
 		rotorhazard.timer.stopAll();
@@ -104,8 +94,6 @@
 			}
 		});
 
-
-
 		socket.on('race_scheduled', function (msg) {
 			if (msg.scheduled) {
 				var deferred_start = msg.scheduled_at * 1000;  // convert seconds (pi) to millis (JS)
@@ -115,49 +103,40 @@
 			}
 		});
 
-
-
 		socket.on('pilot_data', function (msg) {
 			rotorhazard.event.pilot_attributes = msg.attributes;
 			rotorhazard.event.pilots = msg.pilots;
 			rotorhazard.options.pilotSort = msg.pilotSort;
 			ddr_pilots = msg.pilots;	
-            //console.log(ddr_pilots);
+			//console.log(ddr_pilots);
 		});	
 
-
-        socket.on('result_data', function (msg) {
+		socket.on('result_data', function (msg) {
 			ddr_race_data = msg;
-            //console.log(ddr_race_data);
+			//console.log(ddr_race_data);
 			//display_result_data(result_data);
-
-            //
 		});
 
+		socket.on('class_data', function (msg) {
+			ddr_class_data = msg.classes;
+			//console.log(ddr_class_data);
+			loadEliminationBracket();
+		});
 
-        socket.on('class_data', function (msg) {
-            ddr_class_data = msg.classes;
-            //console.log(ddr_class_data);
-            loadEliminationBracket();
-        });
+		socket.on('heat_data', function (msg) {
+			ddr_heat_data = msg.heats;
 
-        socket.on('heat_data', function (msg) {
-            ddr_heat_data = msg.heats;
-            
-            //if ddr_class_data is not loaded
-            if (ddr_class_data != undefined) {
-                loadEliminationBracket();
-            }
-
-        });
-
+			// if ddr_class_data is not loaded
+			if (ddr_class_data != undefined) {
+				loadEliminationBracket();
+			}
+		});
 
 		socket.on('heartbeat', function (msg) {
 		});
 
 		socket.on('leaderboard', function (msg) {
-	
-            if (msg && 'last_race' in msg) {
+			if (msg && 'last_race' in msg) {
 	   			var race = msg.last_race;
 			} else {
 				var race = msg.current;
@@ -168,122 +147,89 @@
 			leaderboard_type = race.leaderboard.meta.primary_leaderboard;
 			//$('#nextup_pilot_box').empty();
 			//build_fai_nextup(race.leaderboard[leaderboard_type], 'current', race.leaderboard.meta);
-			
 		});
 
 		socket.on('prestage_ready', function (msg) {
 			request_time = new Date();
 		});
-
-	
-
-
-
-
-		
 	});
 
 	function speak(obj, priority) {} // stub to prevent crashing
-    
 
-    let race_class_id;
-    let race_class_title = '{{ class_title }}';
-    let race_numb_pilots = '{{ numb_pilots }}';
-
-
-
-	
+	let race_class_id;
+	let race_class_title = '{{ class_title }}';
+	let race_numb_pilots = '{{ numb_pilots }}';
 
 </script>
 
-
-
 <main class="page-stream">
-	
 
-    <div id="fai_brackets">
+	<div id="fai_brackets">
 
+		<div id="brackets" class="brackets-viewer">
 
-        <div id="brackets" class="brackets-viewer">
+			<div class="bracket_group">
+				<div class="bracket_group_title">
+					Winner Bracket
+				</div>
 
+				<div id="winner_bracket_content" class="bracket_group_content">
 
+					<!--
+					<div class="bracket_race">
+						<div class="bracket_race_title">Race 1</div>
+						<div class="bracket_race_pilots">
 
-            <div class="bracket_group">
-                <div class="bracket_group_title">
-                    Winner Bracket
-                </div>
+							<div class="bracket_race_pilot">
+								<div class="avatar">
+									<img src="/ddr/static/assets/imgs/no_avatar.png">
+								</div>
 
-                <div id="winner_bracket_content" class="bracket_group_content">
+								<div class="flag">
+									<img src="/fpvscores/static/assets/imgs/flags/us.jpg" alt="USA">
+								</div>
 
-                    <!--
-                    <div class="bracket_race">
-                        <div class="bracket_race_title">Race 1</div>
-                        <div class="bracket_race_pilots">
+								<div class="pilot_name">
+									Pilot 1
+								</div>
+							</div>
 
-                            <div class="bracket_race_pilot">
-                                <div class="avatar">
-                                    <img src="/ddr/static/assets/imgs/no_avatar.png">
-                                </div>
+							<div class="bracket_race_pilot">
+								Pilot 2
+							</div>
+							<div class="bracket_race_pilot">
+								Pilot 3
+							</div>
+							<div class="bracket_race_pilot">
+								Pilot 4
+							</div>
 
-                                <div class="flag">
-                                    <img src="/fpvscores/static/assets/imgs/flags/us.jpg" alt="USA">
-                                </div>
+						</div>
+					</div>
 
-                                <div class="pilot_name">
-                                    Pilot 1
-                                </div>
-                            </div>
+					-->
 
+				</div>
 
-                            <div class="bracket_race_pilot">
-                                Pilot 2
-                            </div>
-                            <div class="bracket_race_pilot">
-                                Pilot 3
-                            </div>
-                            <div class="bracket_race_pilot">
-                                Pilot 4
-                            </div>
+			</div>
 
-                        </div>
-                    </div>
+			<div class="bracket_group">
+				<div class="bracket_group_title">
+					Lower Bracket
+				</div>
 
-                    -->
-                
-                </div>
+				<div id="loser_bracket_content" class="bracket_group_content">
+				</div>
 
-                 
+			</div>
 
-            </div>
+		</div>
 
-
-            <div class="bracket_group">
-                <div class="bracket_group_title">
-                    Lower Bracket
-                </div>
-
-                <div id="loser_bracket_content" class="bracket_group_content">
-                </div>
-
-                
-            </div>
-
-
-
-
-        </div>
-
-
-
-    </div>
-
+	</div>
 
 </div>
 
 </main>
-
-
-
 
 </body>
 

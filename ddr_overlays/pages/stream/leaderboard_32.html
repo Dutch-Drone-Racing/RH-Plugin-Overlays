@@ -36,6 +36,7 @@
 	<link rel="stylesheet" href="/ddr_overlays/static/fonts/teko/stylesheet.css"></link>
 	<link rel="stylesheet" href="/ddr_overlays/static/css/ddr_overlays.css"></link>
 
+	<!-- Child template head content -->
 
 </head>
 
@@ -43,35 +44,34 @@
 
 	<script type="text/javascript" charset="utf-8" src="/ddr_overlays/static/js/ddr_overlays.js"></script>
 
-
 	<link rel="stylesheet" href="/static/stream.css"></link>
 
 	<script type="text/javascript" charset="utf-8">
+
 		var data_dependencies = [
 			'all_languages',
 			'language',
 			'result_data',
 			'pilot_data'
 		];
-	
-	
+
 		rotorhazard.show_messages = false;
 		var result_data;
 		var streamclass = {{ class_id }}
-	
+
 		$(document).ready(function () {
 			if (!{{ class_id }}) {
 				socket.emit('load_data', {'load_types': [
 					'current_heat',
 				]});
 			}
-	
+
 			socket.on('language', function (msg) {
 				if (msg.language) {
 					rotorhazard.interface_language = msg.language;
 				}
 			});
-	
+
 			socket.on('current_heat', function (msg) {
 				if (!{{ class_id }}) {
 					if (msg.heat_class) {
@@ -85,21 +85,20 @@
 				}
 			});
 
-			            /* Pilots */
+						/* Pilots */
 			socket.on('pilot_data', function (msg) {
-                rotorhazard.event.pilot_attributes = msg.attributes;
-                rotorhazard.event.pilots = msg.pilots;
-                rotorhazard.options.pilotSort = msg.pilotSort;
-                
-                load_pilots(rotorhazard);
-		    });
+				rotorhazard.event.pilot_attributes = msg.attributes;
+				rotorhazard.event.pilots = msg.pilots;
+				rotorhazard.options.pilotSort = msg.pilotSort;
 
-	
+				load_pilots(rotorhazard);
+			});
+
 			function display_nothing() {
 				$('#header h1').html(__('No Data'))
 				$('#leaderboard').html('<p>' + __('There is no saved race data available to view.') + '</p>');
 			}
-	
+
 			function display_result_data(msg) {
 				if (!$.isEmptyObject(msg.heats)) {
 					for (var class_id in msg.heats_by_class) {
@@ -112,30 +111,23 @@
 									class_name = __('Class') + ' ' + current_class.id;
 								}
 								$('#header h1').html(class_name)
-	
+
 								if (current_class.ranking) {
 									leaderboard = build_leaderboard_fai(current_class.ranking, 'by_race_time', undefined);
-	
+
 									leaderboard.find('tbody tr').filter(':nth-child(n+33)').remove();
-	
+
 									//$('#leaderboard').html(leaderboard);
 
-									
 									leaderboard_fai_p1 = leaderboard.find('tbody tr').filter(':nth-child(n+9)').remove();
 									$('#leaderboard_fai_p1').html(leaderboard_fai_p1);
 
 									leaderboard_fai_p2 = leaderboard.find('tbody tr').filter(':nth-child(n+9)').remove();
 									leaderboard_fai_p2.find('tbody tr').filter(':nth-child(n+9)').remove();
 									$('#leaderboard_fai_p2').html(leaderboard_fai_p2);
-
-
-
-
 								} else if (current_class.leaderboard[current_class.leaderboard.meta.primary_leaderboard].length) {
-				
-									
 									var leaderboard = build_leaderboard_fai(current_class.leaderboard[current_class.leaderboard.meta.primary_leaderboard], current_class.leaderboard.meta.primary_leaderboard, msg.meta);
-									
+
 									// Verwijder alle rijen na de 32e, als die er zijn
 									leaderboard.find('tbody tr').filter(':nth-child(n+33)').remove();
 
@@ -143,33 +135,36 @@
 									var rows = leaderboard.find('tbody tr');
 									var numRows = rows.length;
 									var numPages = Math.ceil(numRows / 8);
-									
+
 									// Toon de juiste hoeveelheid pagina's door rijen te verwijderen
 									for (var i = 1; i <= numPages; i++) {
 										var pageId = '#leaderboard_fai_p' + i;
 										var start = (i - 1) * 8 + 1;
 										var end = start + 7;
-										
+
 										// Kloon de leaderboard voor nieuwe pagina
 										var pageLeaderboard = leaderboard.clone();
-										
+
 										// Verwijder rijen die niet in dit segment horen
 										pageLeaderboard.find('tbody tr').filter(function(index) {
 											return (index < start - 1 || index > end - 1);
 										}).remove();
-										
+
 										// Voeg de gekloonde en gefilterde leaderboard toe aan de juiste div
 										$(pageId).html(pageLeaderboard);
 									}
-									
+
 									// Verwijder ongebruikte divs als er minder dan 4 pagina's zijn
 									for (var j = numPages + 1; j <= 4; j++) {
 										$('#leaderboard_fai_p' + j).remove();
 									}
-						
+
+									// When pilots are <= 16, show them on two columns instead of four
+									if (numPages <= 2) {
+										$('.leaderboard_fai_page').width('calc(50% - 20px)');
+									}
+
 									render_pilots(rotorhazard);
-
-
 								} else {
 									display_nothing()
 								}
@@ -180,18 +175,17 @@
 					display_nothing()
 				}
 			}
-	
+
 			socket.on('result_data', function (msg) {
 				result_data = msg;
 				display_result_data(result_data);
 			});
 		});
-	
+
 	</script>
 
-	
 	<main class="page-streamclass leaderboard_fs" id="ddr_leaderboard32">
-	
+
 		<!--Display the race leaderboard-->
 
 		<div id="leaderboard_fai_p1" class="leaderboard_fai_page" >
@@ -210,17 +204,11 @@
 
 		</div>
 
-
-
 	</main>
-	
 
 	<div id="pilotlist">
 
 	</div>
-
-	
-
 
 </body>
 
