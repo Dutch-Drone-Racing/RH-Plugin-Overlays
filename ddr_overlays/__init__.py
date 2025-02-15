@@ -83,10 +83,6 @@ def initialize(rhapi):
 
     rhapi.ui.blueprint_add(bp)
 
-    leaderboard_markdown = 'abc def'
+    rhapi.ui.register_panel("ddr_overlays", "DDR - OBS Overlays", "settings")
+    rhapi.ui.register_markdown("ddr_overlays", "DDR Overlays link", "Overlays are available [here](/ddr_overlays)")
 
-    rhapi.ui.register_markdown(
-        'ddr_overlays',
-        'DDR Overlays',
-        leaderboard_markdown
-    )
