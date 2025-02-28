@@ -34,14 +34,17 @@ def initialize(rhapi):
         static_url_path='/ddr_overlays/static'
     )
 
+    ### home page ###
     @bp.route('/ddr_overlays')
     def ddr_overlays_homePage():
         return templating.render_template('ddr_overlay_index.html', serverInfo=None, getOption=rhapi.db.option, __=rhapi.__)
 
+    ### bar ###
     @bp.route('/ddr_overlays/stream/bar')
     def ddr_overlays_streamBar():
         return templating.render_template('stream/bar.html', serverInfo=None, getOption=rhapi.db.option, __=rhapi.__, DEBUG=False)
 
+    ### overlays based on bracket type and class ###
     @bp.route('/ddr_overlays/stream/next_up/<string:bracket_type>/<int:class_id>')
     def ddr_overlays_streamNextUp(bracket_type, class_id):
         return templating.render_template('stream/next_up.html', serverInfo=None, getOption=rhapi.db.option, __=rhapi.__, DEBUG=False,
@@ -62,7 +65,7 @@ def initialize(rhapi):
 
     @bp.route('/ddr_overlays/stream/brackets/<string:bracket_type>/<int:class_id>')
     def ddr_overlays_streamBrackets(bracket_type, class_id):
-        return templating.render_template('stream/brackets.html', serverInfo=None, getOption=rhapi.db.option,__=rhapi.__,
+        return templating.render_template('stream/brackets.html', serverInfo=None, getOption=rhapi.db.option,__=rhapi.__, DEBUG=False,
             bracket_type=bracket_type, class_id=class_id
         )
 
@@ -71,7 +74,9 @@ def initialize(rhapi):
         return templating.render_template('stream/last_heat.html', serverInfo=None, getOption=rhapi.db.option, __=rhapi.__, DEBUG=False,
             bracket_type=bracket_type, class_id=class_id
         )
+    ################################################
 
+    ### node ###
     @bp.route('/ddr_overlays/stream/node/<int:node_id>')
     def ddr_overlays_streamNode(node_id):
         if node_id <= 8:

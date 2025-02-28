@@ -1,5 +1,165 @@
-/* Leaderboards */
-function build_fai_nextup(leaderboard, display_type, meta, show_position=false) {
+/* Common data and functions for overlays */
+var request_time;
+var request_pi_time;
+var resume_check = true;
+
+function speak(obj, priority) {} // stub to prevent crashing
+
+/* default handlers for RotorHazard events */
+// NOTE: 'race_kickoff' must be defined locally in the HTML
+default_handler = {
+    'language': function (msg) {
+        if (msg.language) {
+            rotorhazard.interface_language = msg.language;
+        }
+    },
+    
+    'race_scheduled': function (msg) {
+        if (msg.scheduled) {
+            var deferred_start = msg.scheduled_at * 1000;  // convert seconds (pi) to millis (JS)
+            rotorhazard.timer.deferred.start(deferred_start, null);
+        } else {
+            rotorhazard.timer.deferred.stop();
+        }
+    },
+    
+    'race_status': function (msg) {
+        switch (msg.race_status) {
+            case 1: // Race running
+                rotorhazard.race_status_go_time = window.performance.now();
+                $('body').addClass('race-running');
+                $('body').removeClass('race-stopped');
+                $('body').removeClass('race-new');
+                $('.timing-clock').removeClass('staging');
+                if (resume_check) {
+                    race_kickoff(msg);
+                }
+                break;
+            case 2: // Race stopped, clear or save laps
+                $('body').removeClass('race-running');
+                $('body').addClass('race-stopped');
+                $('body').removeClass('race-new');
+                $('.timing-clock').removeClass('staging');
+                break;
+            case 3: // Staging
+                $('body').removeClass('race-stopped');
+                $('body').addClass('race-running');
+                $('body').removeClass('race-new');
+                $('.timing-clock').addClass('staging');
+                if (resume_check) {
+                    race_kickoff(msg);
+                }
+                break;
+            default: // Waiting to start new race
+                $('body').removeClass('race-running');
+                $('body').removeClass('race-stopped');
+                $('body').addClass('race-new');
+                $('.timing-clock').removeClass('staging');
+                if (resume_check) {
+                    socket.emit('get_race_scheduled');
+                }
+                break;
+        }
+
+        resume_check = false;
+    },
+    
+    'heartbeat': function (msg) {
+    },
+    
+    'prestage_ready': function (msg) {
+        request_time = new Date();
+    },
+    
+    'stage_ready': function (msg) {
+        race_kickoff(msg);
+    },
+    
+    'stop_timer': function (msg) {
+        rotorhazard.timer.stopAll();
+    },
+    
+    'pi_time': function (msg) {
+        var response_time = window.performance.now();
+        var server_delay = response_time - rotorhazard.pi_time_request;
+        var server_oneway = server_delay ? server_delay / 2 : server_delay;
+
+        var server_time_differential = {
+            'differential': (msg.pi_time_s * 1000) - response_time - server_oneway, // convert seconds (pi) to millis (JS)
+            'response': parseFloat(server_delay)
+        }
+
+        // store sync sample
+        rotorhazard.server_time_differential_samples.push(server_time_differential);
+
+        // sort stored samples
+        rotorhazard.server_time_differential_samples.sort(function(a, b) {
+            return a.response - b.response;
+        })
+
+        // remove unusable samples
+        var diff_min = rotorhazard.server_time_differential_samples[0].differential - rotorhazard.server_time_differential_samples[0].response
+        var diff_max = rotorhazard.server_time_differential_samples[0].differential + rotorhazard.server_time_differential_samples[0].response
+
+        rotorhazard.server_time_differential_samples = rotorhazard.server_time_differential_samples.filter(function(value, index, array) {
+            return value.differential >= diff_min && value.differential <= diff_max;
+        });
+
+        // get filtered value
+        var a = [];
+        for (var i in rotorhazard.server_time_differential_samples) {
+            a.push(rotorhazard.server_time_differential_samples[i].differential);
+        }
+        rotorhazard.server_time_differential = median(a);
+
+        // pass current sync to timers
+        rotorhazard.timer.race.sync();
+        rotorhazard.timer.deferred.sync();
+
+        // continue sampling for sync to improve accuracy
+        if (rotorhazard.server_time_differential_samples.length < 10) {
+            setTimeout(function() {
+                rotorhazard.pi_time_request = window.performance.now();
+                socket.emit('get_pi_time');
+            }, (Math.random() * 500) + 250); // 0.25 to 0.75s delay
+        }
+
+        // update server info
+        var a = Infinity;
+        for (var i in rotorhazard.server_time_differential_samples) {
+            a = Math.min(a, rotorhazard.server_time_differential_samples[i].response);
+        }
+        rotorhazard.sync_within = Math.ceil(a);
+        //$('#server-lag').html('<p>Sync quality: within ' + a + 'ms (' + rotorhazard.server_time_differential_samples.length + ' samples)</p>');
+    },
+};
+
+
+
+/* Format-related functions */
+function get_number_of_pilots_from_format(bracket_type) {
+    var format_16 = ['multigp16', 'fai16', 'fai16de'];
+    if (format_16.includes(bracket_type)) {
+        return 16;
+    }
+    
+    var format_32 = ['fai32', 'fai32de'];
+    if (format_32.includes(bracket_type)) {
+        return 32;
+    }
+    
+    var format_64 = ['fai64', 'fai64de'];
+    if (format_64.includes(bracket_type)) {
+        return 64;
+    }
+    
+    return 999;
+}
+
+
+
+/* HTML generators */
+function build_nextup(leaderboard, display_type, meta, ddr_pilot_data, show_position=false) {
     if (typeof(display_type) === 'undefined') {
         var display_type = 'by_race_time';
     }
@@ -14,7 +174,7 @@ function build_fai_nextup(leaderboard, display_type, meta, show_position=false) 
     for (var i in leaderboard) {
 
         let pilot_name = leaderboard[i].callsign;       
-        let flag = getPilotFlag(leaderboard[i].pilot_id, ddr_pilots);
+        let flag = getPilotFlag(leaderboard[i].pilot_id, ddr_pilot_data);
 
         let pilotImg = '/static/user/avatars/' + leaderboard[i].callsign.replace(/ /g,"_").toLowerCase() + '.jpg';      
         if (!imageExists(pilotImg)) {
@@ -24,17 +184,17 @@ function build_fai_nextup(leaderboard, display_type, meta, show_position=false) 
         let html = '<div class="nextup_pilot">';
         if (show_position) {
             let position_strings = ["1st", "2nd", "3rd", "4th"];
-            html += '<div class="nextup_pilot_position">'+position_strings[i]+'</div>';
+            html += '<div class="nextup_pilot_position">'+ position_strings[i] +'</div>';
             $('#nextup_pilot_box').height(480);  // give more space to show positions (overriding CSS)
+            // that's the place where you can add other info such as fastest lap
         }
         html += '<div class="nextup_pilot_avatar"><div class="nextup_pilot_avatar_mask"><img src="'+pilotImg+'" alt="Avatar"></div></div><div class="nextup_pilot_flag"><div class="nextup_pilot_flag_mask"><img src="/ddr_overlays/static/imgs/flags/'+flag+'.jpg"></div></div><div class="nextup_pilot_name">'+pilot_name+'</div></div>';
 
         $('#nextup_pilot_box').append(html);
-
     }
 }
 
-function build_leaderboard_fai(leaderboard, display_type, meta, display_starts=false, rotorhazard) {
+function build_leaderboard(leaderboard, display_type, meta, number_of_pilots=999, display_starts=false) {
     if (typeof(display_type) === 'undefined') {
         var display_type = 'by_race_time';
     }
@@ -108,128 +268,121 @@ function build_leaderboard_fai(leaderboard, display_type, meta, display_starts=f
     var body = $('<tbody>');
 
     for (var i in leaderboard) {
-        var row = $('<tr id="pilot_id_'+leaderboard[i].pilot_id+'">');
+        if (i < number_of_pilots) {
+            var row = $('<tr id="pilot_id_' + leaderboard[i].pilot_id + '">');
 
-        row.append('<td class="pos">'+ (leaderboard[i].position != null ? leaderboard[i].position : '-') +'</td>');
+            row.append('<td class="pos">'+ (leaderboard[i].position != null ? leaderboard[i].position : '-') +'</td>');
 
-        // ADD AVATAR
+            // ADD AVATAR
 
-        var pilotImg = '/static/user/avatars/' + leaderboard[i].callsign.replace(/ /g,"_").toLowerCase() + '.jpg';
+            var pilotImg = '/static/user/avatars/' + leaderboard[i].callsign.replace(/ /g,"_").toLowerCase() + '.jpg';
 
-        if (!imageExists(pilotImg)) {
-            pilotImg = '/ddr_overlays/static/imgs/no_avatar.png';
+            if (!imageExists(pilotImg)) {
+                pilotImg = '/ddr_overlays/static/imgs/no_avatar.png';
+            }
+
+            row.append('<td class="avatar"><img src=" ' + pilotImg + ' "></td>');
+
+            row.append('<td class="flag" id="pilot_id_flag_' + leaderboard[i].pilot_id + '"><img class="country_flag" src="/ddr_overlays/static/imgs/flags/nl.jpg"></td>');
+
+            country_flag = '';
+            var pilot_name_flag = leaderboard[i].callsign;
+
+            row.append('<td class="pilot">'+ pilot_name_flag +'</td>');
+            if (meta.team_racing_mode) {
+                row.append('<td class="team">' + leaderboard[i].team_name + '</td>');
+            }
+            if (display_starts == true) {
+                row.append('<td class="starts">' + leaderboard[i].starts + '</td>');
+            }
+            if (display_type == 'by_race_time' ||
+            display_type == 'heat' ||
+            display_type == 'round' ||
+            display_type == 'current') {
+                var lap = leaderboard[i].laps;
+                if (!lap || lap == '0:00.000')
+                    lap = '&#8212;';
+                row.append('<td class="laps">'+ lap +'</td>');
+
+                if (meta.start_behavior == 2) {
+                    var lap = leaderboard[i].total_time_laps;
+                } else {
+                    var lap = leaderboard[i].total_time;
+                }
+                if (!lap || lap == '0:00.000')
+                    lap = '&#8212;';
+                row.append('<td class="total">'+ lap +'</td>');
+
+                var lap = leaderboard[i].average_lap;
+                if (!lap || lap == '0:00.000')
+                    lap = '&#8212;';
+                row.append('<td class="avg">'+ lap +'</td>');
+            }
+            if (display_type == 'by_fastest_lap' ||
+            display_type == 'heat' ||
+            display_type == 'round' ||
+            display_type == 'current') {
+                var lap = leaderboard[i].fastest_lap;
+                if (!lap || lap == '0:00.000')
+                    lap = '&#8212;';
+
+                var el = $('<td class="fast">'+ lap +'</td>');
+
+                if (leaderboard[i].fastest_lap_source) {
+                    var source = leaderboard[i].fastest_lap_source;
+                    var source_text = source.displayname + ' / ' + __('Round') + ' ' + source.round;
+                } else {
+                    var source_text = 'None';
+                }
+
+                if (display_type == 'heat') {
+                    el.data('source', source_text);
+                    el.attr('title', source_text);
+                }
+
+                row.append(el);
+
+                if (display_type == 'by_fastest_lap') {
+                    row.append('<td class="source">' + source_text + '</td>');
+                }
+            }
+            if (display_type == 'by_consecutives' ||
+            display_type == 'heat' ||
+            display_type == 'round' ||
+            display_type == 'current') {
+                var data = leaderboard[i];
+                if (!data.consecutives || data.consecutives == '0:00.000') {
+                    lap = '&#8212;';
+                } else {
+                    lap = data.consecutives_base + '/' + data.consecutives;
+                }
+
+                var el = $('<td class="consecutive">' + lap + '</td>');
+
+                if (leaderboard[i].consecutives_source) {
+                    var source = leaderboard[i].consecutives_source;
+                    var source_text = source.displayname + ' / ' + __('Round') + ' ' + source.round;
+                } else {
+                    var source_text = 'None';
+                }
+
+                if (display_type == 'heat') {
+                    el.data('source', source_text);
+                    el.attr('title', source_text);
+                }
+
+                row.append(el);
+
+                if (display_type == 'by_consecutives') {
+                    row.append('<td class="source">' + source_text + '</td>');
+                }
+            }
+
+            if (show_points && 'primary_points' in meta) {
+                row.append('<td class="points">' + leaderboard[i].points + '</td>');
+            }
+            body.append(row);
         }
-
-        row.append('<td class="avatar"><img src=" '+ pilotImg +' "></td>');
-
-        row.append('<td class="flag" id="pilot_id_flag_'+leaderboard[i].pilot_id+'"><img class="country_flag" src="/ddr_overlays/static/imgs/flags/nl.jpg"></td>');
-
-        country_flag = '';
-        var pilot_name_flag = leaderboard[i].callsign;
-
-        row.append('<td class="pilot">'+ pilot_name_flag +'</td>');
-        if (meta.team_racing_mode) {
-            row.append('<td class="team">'+ leaderboard[i].team_name +'</td>');
-        }
-        if (display_starts == true) {
-            row.append('<td class="starts">'+ leaderboard[i].starts +'</td>');
-        }
-        if (display_type == 'by_race_time' ||
-        display_type == 'heat' ||
-        display_type == 'round' ||
-        display_type == 'current') {
-            var lap = leaderboard[i].laps;
-            if (!lap || lap == '0:00.000')
-                lap = '&#8212;';
-            row.append('<td class="laps">'+ lap +'</td>');
-
-            if (meta.start_behavior == 2) {
-                var lap = leaderboard[i].total_time_laps;
-            } else {
-                var lap = leaderboard[i].total_time;
-            }
-            if (!lap || lap == '0:00.000')
-                lap = '&#8212;';
-            row.append('<td class="total">'+ lap +'</td>');
-
-            var lap = leaderboard[i].average_lap;
-            if (!lap || lap == '0:00.000')
-                lap = '&#8212;';
-            row.append('<td class="avg">'+ lap +'</td>');
-        }
-        if (display_type == 'by_fastest_lap' ||
-        display_type == 'heat' ||
-        display_type == 'round' ||
-        display_type == 'current') {
-            var lap = leaderboard[i].fastest_lap;
-            if (!lap || lap == '0:00.000')
-                lap = '&#8212;';
-
-            var el = $('<td class="fast">'+ lap +'</td>');
-
-            if (leaderboard[i].fastest_lap_source) {
-                var source = leaderboard[i].fastest_lap_source;
-                var source_text = source.displayname + ' / ' + __('Round') + ' ' + source.round;
-            } else {
-                var source_text = 'None';
-            }
-
-            if (display_type == 'heat') {
-                el.data('source', source_text);
-                el.attr('title', source_text);
-            }
-
-            /*
-            if ('min_lap' in rotorhazard
-                && rotorhazard.min_lap > 0
-                && leaderboard[i].fastest_lap_raw > 0
-                && (rotorhazard.min_lap * 1000) > leaderboard[i].fastest_lap_raw
-                ) {
-                el.addClass('min-lap-warning');
-            }*/
-
-            row.append(el);
-
-            if (display_type == 'by_fastest_lap') {
-                row.append('<td class="source">'+ source_text +'</td>');
-            }
-        }
-        if (display_type == 'by_consecutives' ||
-        display_type == 'heat' ||
-        display_type == 'round' ||
-        display_type == 'current') {
-            var data = leaderboard[i];
-            if (!data.consecutives || data.consecutives == '0:00.000') {
-                lap = '&#8212;';
-            } else {
-                lap = data.consecutives_base + '/' + data.consecutives;
-            }
-
-            var el = $('<td class="consecutive">'+ lap +'</td>');
-
-            if (leaderboard[i].consecutives_source) {
-                var source = leaderboard[i].consecutives_source;
-                var source_text = source.displayname + ' / ' + __('Round') + ' ' + source.round;
-            } else {
-                var source_text = 'None';
-            }
-
-            if (display_type == 'heat') {
-                el.data('source', source_text);
-                el.attr('title', source_text);
-            }
-
-            row.append(el);
-
-            if (display_type == 'by_consecutives') {
-                row.append('<td class="source">'+ source_text +'</td>');
-            }
-        }
-
-        if (show_points && 'primary_points' in meta) {
-            row.append('<td class="points">' + leaderboard[i].points + '</td>');
-        }
-        body.append(row);
     }
 
     table.append(body);
@@ -238,18 +391,20 @@ function build_leaderboard_fai(leaderboard, display_type, meta, display_starts=f
     return twrap;
 }
 
-function getPilotFlag(pilot_id, ddr_pilots) {
-    count = Object.keys(ddr_pilots).length;
-    for (var i = 0; i < count; i++) {
-        let pilot = ddr_pilots[i];
 
+
+/* Pilot flags */
+function getPilotFlag(pilot_id, ddr_pilot_data) {
+    count = Object.keys(ddr_pilot_data).length;
+    for (var i = 0; i < count; i++) {
+        let pilot = ddr_pilot_data[i];
         if (pilot.pilot_id == pilot_id) {
-            pilot = ddr_pilots[i];
+            pilot = ddr_pilot_data[i];
             if (pilot.country) {
-                country_upp = pilot.country;
-                //country_flag = '<img class="country_flag" src="/fpvscores/static/assets/imgs/flags/'+country_upp+'.jpg">';
+                country_upper = pilot.country;
+                //country_flag = '<img class="country_flag" src="/fpvscores/static/assets/imgs/flags/'+country_upper+'.jpg">';
                 //$('#pilot_flag').html(country_flag);
-                return country_upp;
+                return country_upper;
             }
             break;
         }
@@ -263,7 +418,24 @@ function imageExists(image_url) {
     return http.status != 404;
 }
 
-function pilot_attributes(rotorhazard) {
+
+
+/* Functions for pilots */
+function render_pilots(rotorhazard) {
+    generate_pilot_attributes(rotorhazard);
+    for (var i = 0; i < rotorhazard.event.pilots.length; i++) {
+        pilot = rotorhazard.event.pilots[i];
+        country_flag = pilot.attributes.country.value.toLowerCase();
+        pilot_id = pilot.pilot_id;
+
+        // if div exists
+        if (document.getElementById('pilot_id_flag_' + pilot.pilot_id)) {
+            document.getElementById('pilot_id_flag_' + pilot.pilot_id).innerHTML = '<img class="country_flag" src="/ddr_overlays/static/imgs/flags/' + country_flag + '.jpg">';
+        }
+    }
+}
+
+function generate_pilot_attributes(rotorhazard) {
     for (var i in rotorhazard.event.pilots) {
         var pilot = rotorhazard.event.pilots[i];
         if (pilot.pilot_id != 0) {
@@ -277,102 +449,54 @@ function pilot_attributes(rotorhazard) {
                 }
                 var pilot_attr_name = pilot_attr.name;
                 var attr_object = { name: pilot_attr_name, value: pilot_attr.value };
-                //pilot.attributes.push(attr_object);
                 pilot.attributes[pilot_attr_name] = attr_object;
             }
         }
     }
 }
 
-function load_pilots(rotorhazard) {
-    rotorhazard = rotorhazard;
-    render_pilots(rotorhazard);
 
-    console.log('No active_single_pilot');
-}
 
-function render_pilots(rotorhazard) {
-    var pilotlist = document.getElementById('pilotlist');
-    var pilotlist_html_2 = '';
-
-    pilot_attributes(rotorhazard);
-
-    for (var i = 0; i < rotorhazard.event.pilots.length; i++) {
-        pilot = rotorhazard.event.pilots[i];
-        //pilot.attributes = pilot_attributes(rotorhazard, rotorhazard.event.pilots[i].pilot_id);
-        //console.log(pilot);
-        country_flag = pilot.attributes.country.value.toLowerCase();
-        pilot_id = pilot.pilot_id;
-        console.log(country_flag + ' - ' + pilot_id);
-
-        // if div exists pilot_id_flag_'+leaderboard[i].pilot_id+'
-        if (document.getElementById('pilot_id_flag_'+pilot.pilot_id)) {
-            //console.log('pilot_id_flag_'+pilot.pilot_id);
-            document.getElementById('pilot_id_flag_'+pilot.pilot_id).innerHTML = '<img class="country_flag" src="/ddr_overlays/static/imgs/flags/'+country_flag+'.jpg">';
-        }
-    }
-
-    //pilots = rotorhazard.event.pilots;
-
-    //pilotlist.innerHTML = pilotlist_html_2;
-
-}
-
-function loadEliminationBracket() {
-
-    //console.log(ddr_class_data);
+/* HTML generators for brackets */
+function build_elimination_brackets(race_bracket_type, race_class_id, ddr_heat_data, ddr_pilot_data) {
 
     // clear brackets
     $('#winner_bracket_content').html('');
     $('#loser_bracket_content').html('');
 
-    //console.log(ddr_race_data.classes);
-    var classes = ddr_class_data;
-    Object.values(classes).forEach(race_class => {
-        if (race_class.id == race_class_id) {
-            console.log(race_class);
-            race_class_name = race_class.name;
-        }
-    });
-
-    var eliminations_heats = [];
+    var elimination_heats = [];
 
     Object.values(ddr_heat_data).forEach(heat => {
         if (heat.class_id == race_class_id) {
-            eliminations_heats.push(heat);
+            elimination_heats.push(heat);
         }
     });
 
-    console.log(eliminations_heats);
-
-    //loop through heats and build brackets
-
-    console.log('there are ' + eliminations_heats.length + ' heats');
+    // loop through heats and build brackets
+    console.log('There are ' + elimination_heats.length + ' heats');
 
     column_counter = 1;
-    for (let i = 0; i < eliminations_heats.length; i++) {
-        const heat = eliminations_heats[i];
+    for (let i = 0; i < elimination_heats.length; i++) {
+        const heat = elimination_heats[i];
         let html = '<div class="bracket_race">';
         html += '<div class="bracket_race_title">' + heat.displayname + '</div>';
         html += '<div class="bracket_race_pilots">';
 
         const filtered_slots = heat.slots.filter(slot => /*slot.seed_id*/true && slot.seed_rank);
 
-        console.log(filtered_slots);
-
         for (let j = 0; j < filtered_slots.length; j++) {
             const slot = filtered_slots[j];
-            const pilot = ddr_pilots.find(p => p.pilot_id === slot.pilot_id);           
+            const pilot = ddr_pilot_data.find(p => p.pilot_id === slot.pilot_id);           
 
             if (slot.pilot_id === 0) {
                 if (slot.method > -1 && !(slot.method == 0 && !slot.pilot_id)) {
-                    var method_text = get_method_descriptor(slot.method, slot.seed_id, slot.seed_rank, slot.pilot_id)
+                    var method_text = get_method_descriptor(ddr_pilot_data, slot.method, slot.seed_id, slot.seed_rank, slot.pilot_id)
                     html += '<div class="bracket_race_pilot">';
                     html += '<div class="no_pilot">' + method_text + '</div>';
                     html += '</div>';
                 }
             } else {
-                let flag = getPilotFlag(slot.pilot_id, ddr_pilots);
+                let flag = getPilotFlag(slot.pilot_id, ddr_pilot_data);
 
                 let pilotImg = '/static/user/avatars/' + pilot.callsign.replace(/ /g,"_").toLowerCase() + '.jpg';       
                 if (!imageExists(pilotImg)) {
@@ -381,8 +505,8 @@ function loadEliminationBracket() {
 
                 html += '<div class="bracket_race_pilot">';
 
-                html += '<div class="avatar"><img src="'+pilotImg+'"></div>';
-                html += '<div class="flag"><img src="/ddr_overlays/static/imgs/flags/'+flag+'.jpg" alt="USA"></div>';
+                html += '<div class="avatar"><img src="' + pilotImg + '"></div>';
+                html += '<div class="flag"><img src="/ddr_overlays/static/imgs/flags/' + flag + '.jpg" alt="USA"></div>';
                 html += '<div class="pilot_name">' + pilot.callsign + '</div>';
 
                 html += '</div>';
@@ -574,9 +698,9 @@ function loadEliminationBracket() {
     }
 }
 
-function get_method_descriptor(method, seed, rank, pilot_id) {
+function get_method_descriptor(ddr_pilot_data, method, seed, rank, pilot_id) {
     if (method == 0) { // pilot
-        var pilot = ddr_pilots.find(obj => {return obj.pilot_id == pilot_id});
+        var pilot = ddr_pilot_data.find(obj => {return obj.pilot_id == pilot_id});
 
         if (pilot) {
             return pilot.callsign;

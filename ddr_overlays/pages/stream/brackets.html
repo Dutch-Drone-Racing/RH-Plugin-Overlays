@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="RotorHazard">
     <meta name="google" content="notranslate">
-    <title>Stream Node</title>
+    <title>Brackets</title>
 
     <!-- Icons -->
     <link rel="apple-touch-icon" sizes="180x180" href="/static/image/apple-touch-icon.png">
@@ -32,7 +32,6 @@
     <!-- CSS -->
     <link rel="stylesheet" href="/static/magnific-1.1.0/magnific-popup.css"></link>
     <link rel="stylesheet" href="/static/stream.css"></link>
-
     <link rel="stylesheet" href="/ddr_overlays/static/fonts/teko/stylesheet.css"></link>
     <link rel="stylesheet" href="/ddr_overlays/static/css/ddr_overlays.css"></link>
     <!-- load a different CSS based on the number of pilots -->
@@ -52,24 +51,13 @@
         'all_languages',
         'language',
         'pilot_data',
-        'leaderboard',
-        'class_data',
         'heat_data',
-        'result_data'
     ];
 
     rotorhazard.show_messages = false;
 
-    var request_time;
-    var request_pi_time;
-    var resume_check = true;
-
-    var ddr_pilots;
-    var ddr_race_data;
+    var ddr_pilot_data;
     var ddr_heat_data;
-    var ddr_class_data;
-
-    var last_refresh;
 
     function race_kickoff(msg) {
         rotorhazard.timer.stopAll();
@@ -89,77 +77,26 @@
         rotorhazard.pi_time_request = window.performance.now();
         socket.emit('get_pi_time');
 
-        socket.on('language', function (msg) {
-            if (msg.language) {
-                rotorhazard.interface_language = msg.language;
-            }
-        });
+        socket.on('language', default_handler['language']);
 
-        socket.on('race_scheduled', function (msg) {
-            if (msg.scheduled) {
-                var deferred_start = msg.scheduled_at * 1000;  // convert seconds (pi) to millis (JS)
-                rotorhazard.timer.deferred.start(deferred_start, null);
-            } else {
-                rotorhazard.timer.deferred.stop();
-            }
-        });
+        socket.on('race_scheduled', default_handler['race_scheduled']);
 
         socket.on('pilot_data', function (msg) {
             rotorhazard.event.pilot_attributes = msg.attributes;
             rotorhazard.event.pilots = msg.pilots;
             rotorhazard.options.pilotSort = msg.pilotSort;
-            ddr_pilots = msg.pilots;    
-            //console.log(ddr_pilots);
+            ddr_pilot_data = msg.pilots;    
         }); 
-
-        socket.on('result_data', function (msg) {
-            ddr_race_data = msg;
-            //console.log(ddr_race_data);
-            //display_result_data(result_data);
-        });
-
-        socket.on('class_data', function (msg) {
-            ddr_class_data = msg.classes;
-            //console.log(ddr_class_data);
-            loadEliminationBracket();
-        });
 
         socket.on('heat_data', function (msg) {
             ddr_heat_data = msg.heats;
-
-            // if ddr_class_data is not loaded
-            if (ddr_class_data != undefined) {
-                loadEliminationBracket();
-            }
+            build_elimination_brackets('{{ bracket_type }}', '{{ class_id }}', ddr_heat_data, ddr_pilot_data);
         });
 
-        socket.on('heartbeat', function (msg) {
-        });
+        socket.on('heartbeat', default_handler['heartbeat']);
 
-        socket.on('leaderboard', function (msg) {
-            if (msg && 'last_race' in msg) {
-                var race = msg.last_race;
-            } else {
-                var race = msg.current;
-            }
-
-            //$('.curr_heat_title').html(race.displayname);
-
-            leaderboard_type = race.leaderboard.meta.primary_leaderboard;
-            //$('#nextup_pilot_box').empty();
-            //build_fai_nextup(race.leaderboard[leaderboard_type], 'current', race.leaderboard.meta);
-        });
-
-        socket.on('prestage_ready', function (msg) {
-            request_time = new Date();
-        });
+        socket.on('prestage_ready', default_handler['prestage_ready']);
     });
-
-    function speak(obj, priority) {} // stub to prevent crashing
-
-    let race_class_id = '{{ class_id }}';
-    let race_class_name;
-    let race_bracket_type = '{{ bracket_type }}';
 
 </script>
 
@@ -207,7 +144,6 @@
 
                         </div>
                     </div>
-
                     -->
 
                 </div>

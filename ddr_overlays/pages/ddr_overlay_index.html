@@ -24,15 +24,17 @@
             'class_data',
         ];
 
+        rotorhazard.show_messages = false;
+
         var ddr_class_data;
-        
+
         $(document).ready(function () {
             socket.on('language', function (msg) {
                 if (msg.language) {
                     rotorhazard.interface_language = msg.language;
                 }
             });
-            
+
             socket.on('class_data', function (msg) {
                 ddr_class_data = msg.classes;
 
@@ -40,7 +42,7 @@
 
                 // save selected value
                 const selectedValue = selectElement.value;
-                
+
                 // efficient update of class list
                 const newOptionsSet = new Set(ddr_class_data);
 
@@ -60,14 +62,14 @@
                         selectElement.appendChild(option);
                     }
                 });
-                
+
                 // restore selected value
                 if (newOptionsSet.has(selectedValue)) {
                     selectElement.value = selectedValue;
                 }
             });
         });
-        
+
         function openDynamicLink(event, baseURL) {
             event.preventDefault();
             let bracket_type = document.getElementById("bracket_type").value;
@@ -103,7 +105,7 @@
         <p style="max-width: 700px; margin: 0 auto;"><b>Country Flags</b><br>
             A country can be set as pilot attribute in the pilots tab (dropdown). When set it shows the flag icon before the pilot's callsign.
             <br>
-            Flags have been downloaded from <a href="https://flagpedia.net/download/images">flagpedia.net</a> (same width 80px, variable height, JPG format).
+            Flags have been downloaded from <a href="https://flagpedia.net/download/images" target="_blank">flagpedia.net</a> (same width 80px, variable height, JPG format).
         </p>
 
         <br>
@@ -114,18 +116,10 @@
         </p>
     </div>
 
-    <!--
-    <div class="text-center mb-5">
-        <h3>{{ __("Functions")}}:</h3>
-
-        <p><a href="/fpvscores/qr_scanner" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Pilot Check-in")}}</a></p>
-    </div>
-    -->
-
     <div class="text-center mb-5">
         <h3>{{ __("Overlays")}}:</h3>
 
-        <form id="my_form">
+        <form id="ddr_form">
             <label for="bracket_type">Bracket type:</label>
             <select id="bracket_type">
                 <option value="multigp16">MultiGP 16 double-elimination</option>
@@ -145,13 +139,13 @@
             </select>
         </form>
 
-        <p><a href="/ddr_overlays/stream/bar?nologo=1" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Status Bar")}} (1920x200)</a></p>
+        <p><a href="/ddr_overlays/stream/bar?nologo=1" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Status Bar")}} (1920x200)</a></p>
 
         <p><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/next_up")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Next Up")}} (1920x800)</a></p>
 
-        <p><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/leaderboard")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Leaderboard Top 32 - Fullscreen")}} (1920x1080)</a></p>
+        <p><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/leaderboard")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Qualifier Leaderboard - Fullscreen")}} (1920x1080)</a></p>
 
-        <p><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/leaderboard_pages")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Leaderboard Top 32 - Pages")}} (1920x600)</a></p>
+        <p><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/leaderboard_pages")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Qualifier Leaderboard - Pages")}} (1920x600)</a></p>
 
         <p><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/brackets")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Brackets")}} (1920x2000)</a></p>
 
@@ -168,14 +162,14 @@
     <div class="text-center mb-5">
 
         <h3>{{ __("DDR Node Overlays")}} (960x600):</h3>
-        <p><a href="/ddr_overlays/stream/node/1" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 1</a></p>
-        <p><a href="/ddr_overlays/stream/node/2" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 2</a></p>
-        <p><a href="/ddr_overlays/stream/node/3" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 3</a></p>
-        <p><a href="/ddr_overlays/stream/node/4" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 4</a></p>
-        <p><a href="/ddr_overlays/stream/node/5" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 5</a></p>
-        <p><a href="/ddr_overlays/stream/node/6" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 6</a></p>
-        <p><a href="/ddr_overlays/stream/node/7" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 7</a></p>
-        <p><a href="/ddr_overlays/stream/node/8" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 8</a></p>
+        <p><a href="/ddr_overlays/stream/node/1" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 1</a></p>
+        <p><a href="/ddr_overlays/stream/node/2" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 2</a></p>
+        <p><a href="/ddr_overlays/stream/node/3" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 3</a></p>
+        <p><a href="/ddr_overlays/stream/node/4" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 4</a></p>
+        <p><a href="/ddr_overlays/stream/node/5" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 5</a></p>
+        <p><a href="/ddr_overlays/stream/node/6" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 6</a></p>
+        <p><a href="/ddr_overlays/stream/node/7" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 7</a></p>
+        <p><a href="/ddr_overlays/stream/node/8" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 8</a></p>
 
     </div>
 

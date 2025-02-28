@@ -32,7 +32,6 @@
     <!-- CSS -->
     <link rel="stylesheet" href="/static/magnific-1.1.0/magnific-popup.css"></link>
     <link rel="stylesheet" href="/static/stream.css"></link>
-
     <link rel="stylesheet" href="/ddr_overlays/static/fonts/teko/stylesheet.css"></link>
     <link rel="stylesheet" href="/ddr_overlays/static/fonts/inconsolata/stylesheet.css"></link>
     <link rel="stylesheet" href="/ddr_overlays/static/css/ddr_overlays.css"></link>
@@ -42,6 +41,9 @@
 </head>
 
 <body>
+
+    <script type="text/javascript" charset="utf-8" src="/ddr_overlays/static/js/ddr_overlays.js"></script>
+
     <script type="text/javascript" charset="utf-8">
 
         var data_dependencies = [
@@ -54,22 +56,15 @@
             'pilot_data'
         ];
 
-        var rotorhazard;
-        var pilots;
-
         rotorhazard.show_messages = false;
         current_laps = false;
-        streamnode = {{ node_id }}
-        pilot_id = ''; //int
+        streamnode = {{ node_id }};
+        pilot_id = ''; // int
 
         $(document).ready(function () {
             rotorhazard.show_messages = false;
 
-            socket.on('language', function (msg) {
-                if (msg.language) {
-                    rotorhazard.interface_language = msg.language;
-                }
-            });
+            socket.on('language', default_handler['language']);
 
             socket.on('current_heat', function (msg) {
                 for (var idx in msg.heatNodes) {
@@ -122,7 +117,7 @@
                         var lapTime = lap.lap_time;
                         if (lap.splits.length > 0) {
                             lapTime += ' (';
-                            for (k=0; k<lap.splits.length; k++) {
+                            for (k = 0; k < lap.splits.length; k++) {
                                 var split = lap.splits[k];
                                 if (k > 0) {
                                     lapTime += ', ';
@@ -136,12 +131,15 @@
                         }
 
                         tr = $('<tr>')
+
                         if (lap.lap_number == 0) {
+                            // hole shot lap
                             tr.addClass('lap_0');
                             lap.lap_number = __('HS');
                         }
 
                         if (lap.lap_index == node_index.fastest_lap_index) {
+                            // fastest lap
                             tr.addClass('fastest_lap');
                         }
 
@@ -165,25 +163,21 @@
                         // count display_laps
                         console.log(display_laps.length);
 
-                        if (display_laps.length == 0) {
+                        if (node_index.finished_flag) {
+                            $('#pilot_current_lap_text').html('FINISHED');
+                        } else if (display_laps.length == 0) {
                             $('#pilot_current_lap_text').html('STARTING');
-                        }
-                        if (display_laps.length == 1) {
+                        } else if (display_laps.length == 1) {
                             $('#pilot_current_lap_text').html('First Lap');
-                        }
-                        if (display_laps.length == 2) {
+                        } else if (display_laps.length == 2) {
                             $('#pilot_current_lap_text').html('Second Lap');
-                        }
-                        if (display_laps.length == 3) {
+                        } else if (display_laps.length == 3) {
                             $('#pilot_current_lap_text').html('Third Lap');
-                        }
-                        if (display_laps.length == 4) {
+                        } else if (display_laps.length == 4) {
                             $('#pilot_current_lap_text').html('Fourth Lap');
-                        }
-                        if (display_laps.length == 5) {
+                        } else if (display_laps.length == 5) {
                             $('#pilot_current_lap_text').html('Fifth Lap');
-                        }
-                        if (display_laps.length == 6) {
+                        } else if (display_laps.length == 6) {
                             $('#pilot_current_lap_text').html('Sixth Lap');
                         }
                     });
@@ -201,21 +195,15 @@
                 rotorhazard.event.pilot_attributes = msg.attributes;
                 rotorhazard.event.pilots = msg.pilots;
                 rotorhazard.options.pilotSort = msg.pilotSort;
-                //console.log(rotorhazard.event.pilots);
-                //load_pilots(rotorhazard);
 
                 for (pilot in rotorhazard.event.pilots) {
                     if (rotorhazard.event.pilots[pilot].pilot_id == pilot_id) {
 
-                        //console.log(rotorhazard.event.pilots[pilot]);
-
                         pilot = rotorhazard.event.pilots[pilot];
 
                         if (pilot.country) {
-                            country_upp = pilot.country;
-                            //console.log(country_upp);
-
-                            country_flag = '<img class="country_flag" src="/ddr_overlays/static/imgs/flags/'+country_upp+'.jpg">';
+                            country_upper = pilot.country;
+                            country_flag = '<img class="country_flag" src="/ddr_overlays/static/imgs/flags/' + country_upper + '.jpg">';
                             $('#node_flag').html(country_flag);
                         }
 
@@ -230,10 +218,6 @@
                 primary_leaderboard = race.meta.primary_leaderboard;
                 leaderboard = race[primary_leaderboard];
 
-                console.log('update ha leaderboard');
-                //socket.emit('get_pilots');
-
-                //socket.emit('get_data', {'load_types': 'pilot_data'});
                 $single_dependency = 'pilot_data';
                 var single_dependency = [
                     'pilot_data'
@@ -249,13 +233,7 @@
                         document.getElementById("pos").classList.remove("hidden");
 
                         pilot_data = leaderboard[i];
-
                         pilot_id = pilot_data.pilot_id;
-                        console.log(pilot_data);
-
-                        //socket imet get pilot attributes
-
-                        //get_pilot_attributes
 
                         if (pilot_data.position == null) {
                             $('#node_pos').html('-');
@@ -273,10 +251,6 @@
                                 $('#node_pos').html(pilot_data.position + '<sup>th</sup>');
                             }
                         }
-
-                        // $('#position').html((pilot_data.position != null ? pilot_data.position : '-'));
-
-                        //var pilot_name_flag = country_flag + ' ' + pilot_data.callsign;
 
                         $('#node_callsign').html(pilot_data.callsign);
                         // $('#last_lap').html(pilot_data.last_lap ? pilot_data.last_lap : '0:00.000');
@@ -319,42 +293,6 @@
                 }
             });
         });
-
-        function imageExists(image_url) {
-            var http = new XMLHttpRequest();
-            http.open('HEAD', image_url, false);
-            http.send();
-            return http.status != 404;
-        }
-
-        function pilot_attributes(rotorhazard) {
-            for (var i in rotorhazard.event.pilots) {
-                var pilot = rotorhazard.event.pilots[i];
-                if (pilot.pilot_id != 0) {
-                    pilot.attributes = [];
-                    for (var attr_idx in rotorhazard.event.pilot_attributes) {
-                        var pilot_attr = rotorhazard.event.pilot_attributes[attr_idx];
-                        if (pilot[pilot_attr.name] != undefined) {
-                            pilot_attr.value = pilot[pilot_attr.name];
-                        } else {
-                            pilot_attr.value = '';
-                        }
-                        var pilot_attr_name = pilot_attr.name;
-                        var attr_object = { name: pilot_attr_name, value: pilot_attr.value };
-                        //pilot.attributes.push(attr_object);
-                        pilot.attributes[pilot_attr_name] = attr_object;
-                    }
-                }
-            }
-        }
-
-        function load_pilots(rotorhazard) {
-            var pilotlist_html = '';
-
-            pilot_attributes(rotorhazard);
-
-            console.log(rotorhazard.event.pilots);
-        }
 
     </script>
 

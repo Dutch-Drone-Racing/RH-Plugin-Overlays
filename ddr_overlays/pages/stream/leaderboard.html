@@ -32,7 +32,6 @@
     <!-- CSS -->
     <link rel="stylesheet" href="/static/magnific-1.1.0/magnific-popup.css"></link>
     <link rel="stylesheet" href="/static/stream.css"></link>
-
     <link rel="stylesheet" href="/ddr_overlays/static/fonts/teko/stylesheet.css"></link>
     <link rel="stylesheet" href="/ddr_overlays/static/css/ddr_overlays.css"></link>
 
@@ -42,9 +41,9 @@
 
 <body>
 
-    <script type="text/javascript" charset="utf-8" src="/ddr_overlays/static/js/ddr_overlays.js"></script>
-
     <link rel="stylesheet" href="/static/stream.css"></link>
+
+    <script type="text/javascript" charset="utf-8" src="/ddr_overlays/static/js/ddr_overlays.js"></script>
 
     <script type="text/javascript" charset="utf-8">
 
@@ -57,7 +56,7 @@
 
         rotorhazard.show_messages = false;
         var result_data;
-        var streamclass = {{ class_id }}
+        var streamclass = {{ class_id }};
 
         $(document).ready(function () {
             if (!{{ class_id }}) {
@@ -66,11 +65,7 @@
                 ]});
             }
 
-            socket.on('language', function (msg) {
-                if (msg.language) {
-                    rotorhazard.interface_language = msg.language;
-                }
-            });
+            socket.on('language', default_handler['language']);
 
             socket.on('current_heat', function (msg) {
                 if (!{{ class_id }}) {
@@ -85,13 +80,10 @@
                 }
             });
 
-                        /* Pilots */
             socket.on('pilot_data', function (msg) {
                 rotorhazard.event.pilot_attributes = msg.attributes;
                 rotorhazard.event.pilots = msg.pilots;
                 rotorhazard.options.pilotSort = msg.pilotSort;
-
-                load_pilots(rotorhazard);
             });
 
             function display_nothing() {
@@ -113,7 +105,8 @@
                                 $('#header h1').html(class_name)
 
                                 if (current_class.ranking) {
-                                    leaderboard = build_leaderboard_fai(current_class.ranking, 'by_race_time', undefined);
+                                    /* questo IF non so a cosa corrisponde :) */
+                                    leaderboard = build_leaderboard(current_class.ranking, 'by_race_time', undefined);
 
                                     leaderboard.find('tbody tr').filter(':nth-child(n+33)').remove();
 
@@ -126,35 +119,39 @@
                                     leaderboard_fai_p2.find('tbody tr').filter(':nth-child(n+9)').remove();
                                     $('#leaderboard_fai_p2').html(leaderboard_fai_p2);
                                 } else if (current_class.leaderboard[current_class.leaderboard.meta.primary_leaderboard].length) {
-                                    var leaderboard = build_leaderboard_fai(current_class.leaderboard[current_class.leaderboard.meta.primary_leaderboard], current_class.leaderboard.meta.primary_leaderboard, msg.meta);
+                                    /* filtro la leaderboard ai primi 16 o 32 piloti per le qualifiche, non funziona ancora con 64 piloti ma non importa */
+                                    var leaderboard = build_leaderboard(current_class.leaderboard[current_class.leaderboard.meta.primary_leaderboard],
+                                                                        current_class.leaderboard.meta.primary_leaderboard,
+                                                                        msg.meta,
+                                                                        get_number_of_pilots_from_format( '{{ bracket_type }}' ) /* [16|32|64] */ );
 
-                                    // Verwijder alle rijen na de 32e, als die er zijn
+                                    // Elimina tutte le righe dopo la 32-esima
                                     leaderboard.find('tbody tr').filter(':nth-child(n+33)').remove();
 
-                                    // Bereken het aantal pagina's op basis van het aantal rijen
+                                    // Calcola il numero di pagine in base al numero di righe
                                     var rows = leaderboard.find('tbody tr');
                                     var numRows = rows.length;
                                     var numPages = Math.ceil(numRows / 8);
 
-                                    // Toon de juiste hoeveelheid pagina's door rijen te verwijderen
+                                    // Mostra la quantità corretta di pagine rimuovendo le righe
                                     for (var i = 1; i <= numPages; i++) {
                                         var pageId = '#leaderboard_fai_p' + i;
                                         var start = (i - 1) * 8 + 1;
                                         var end = start + 7;
 
-                                        // Kloon de leaderboard voor nieuwe pagina
+                                        // Clona la classifica per la nuova pagina
                                         var pageLeaderboard = leaderboard.clone();
 
-                                        // Verwijder rijen die niet in dit segment horen
+                                        // Elimina le righe che non appartengono a questo segmento
                                         pageLeaderboard.find('tbody tr').filter(function(index) {
                                             return (index < start - 1 || index > end - 1);
                                         }).remove();
 
-                                        // Voeg de gekloonde en gefilterde leaderboard toe aan de juiste div
+                                        // Aggiungi la classifica clonata e filtrata al div appropriato
                                         $(pageId).html(pageLeaderboard);
                                     }
 
-                                    // Verwijder ongebruikte divs als er minder dan 4 pagina's zijn
+                                    // Elimina i div non utilizzati se ci sono meno di 4 pagine
                                     for (var j = numPages + 1; j <= 4; j++) {
                                         $('#leaderboard_fai_p' + j).remove();
                                     }
