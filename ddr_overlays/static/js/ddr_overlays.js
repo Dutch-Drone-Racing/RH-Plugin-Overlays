@@ -460,6 +460,72 @@ function generate_pilot_attributes(rotorhazard) {
 
 
 /* HTML generators for brackets */
+class BracketHeat {
+    constructor(number, type, column, advance_to) {
+        this.number = number;          /* heat number, starting from 1 */
+        this.type = type;              /* 'winner' or 'loser' */
+        this.column = column;          /* column index where the heat shall be rendered, starting from 0 */
+        this.advance_to = advance_to;  /* the next heat where the winners of this heat will race
+                                        * applicable only if the first and the second classified advance to the same heat */
+    }
+}
+
+const bracket_formats = {
+    "multigp16": [
+                   new BracketHeat(1,  "winner", 0, 6),
+                   new BracketHeat(2,  "winner", 0, 6),
+                   new BracketHeat(3,  "winner", 0, 8),
+                   new BracketHeat(4,  "winner", 0, 8),
+                   new BracketHeat(5,  "loser",  0, 9),
+                   new BracketHeat(6,  "winner", 1, 11),
+                   new BracketHeat(7,  "loser",  0, 10),
+                   new BracketHeat(8,  "winner", 1, 11),
+                   new BracketHeat(9,  "loser",  1, 12),
+                   new BracketHeat(10, "loser",  1, 12),
+                   new BracketHeat(11, "winner", 2, 14),
+                   new BracketHeat(12, "loser",  2, 13),
+                   new BracketHeat(13, "loser",  3, 14),
+                   new BracketHeat(14, "winner", 3),
+                 ],
+    //"fai16":     [],
+    //"fai16de":   [],
+    //"fai32":     [],
+    "fai32de":   [
+                   new BracketHeat(1,  "winner", 0),
+                   new BracketHeat(2,  "winner", 0),
+                   new BracketHeat(3,  "winner", 0),
+                   new BracketHeat(4,  "winner", 0),
+                   new BracketHeat(5,  "winner", 1),
+                   new BracketHeat(6,  "winner", 1),
+                   new BracketHeat(7,  "winner", 1),
+                   new BracketHeat(8,  "winner", 1),
+                   new BracketHeat(9,  "winner", 2),
+                   new BracketHeat(10, "winner", 2),
+                   new BracketHeat(11, "winner", 2),
+                   new BracketHeat(12, "winner", 2),
+                   new BracketHeat(13, "loser",  0),
+                   new BracketHeat(14, "loser",  0),
+                   new BracketHeat(15, "loser",  0),
+                   new BracketHeat(16, "loser",  0),
+                   new BracketHeat(17, "loser",  1),
+                   new BracketHeat(18, "loser",  1),
+                   new BracketHeat(19, "loser",  1),
+                   new BracketHeat(20, "loser",  1),
+                   new BracketHeat(21, "loser",  2),
+                   new BracketHeat(22, "loser",  2),
+                   new BracketHeat(23, "winner", 3),
+                   new BracketHeat(24, "winner", 3),
+                   new BracketHeat(25, "loser",  3),
+                   new BracketHeat(26, "loser",  3),
+                   new BracketHeat(27, "loser",  4),
+                   new BracketHeat(28, "winner", 4),
+                   new BracketHeat(29, "loser",  5),
+                   new BracketHeat(30, "winner", 5),
+                 ],
+    //"fai64":     [],
+    //"fai64de":   []
+}
+
 function build_elimination_brackets(race_bracket_type, race_class_id, ddr_heat_data, ddr_pilot_data) {
 
     // clear brackets
@@ -477,7 +543,6 @@ function build_elimination_brackets(race_bracket_type, race_class_id, ddr_heat_d
     // loop through heats and build brackets
     console.log('There are ' + elimination_heats.length + ' heats');
 
-    column_counter = 1;
     for (let i = 0; i < elimination_heats.length; i++) {
         const heat = elimination_heats[i];
         let html = '<div class="bracket_race">';
@@ -518,183 +583,21 @@ function build_elimination_brackets(race_bracket_type, race_class_id, ddr_heat_d
         html += '</div>';
         html += '</div>';
 
-        if (race_bracket_type == "multigp16") {
-            // double elimination, 16 pilots, MultiGP
-            if (i < 4) {        
-                column_counter = 0; 
+        if (bracket_formats[race_bracket_type] != undefined) {
+            let bracket_heat_info = bracket_formats[race_bracket_type][i];
+
+            if (bracket_heat_info.type == "winner") {
+                var column_counter = bracket_heat_info.column; 
                 if ($('#bracket_column_' + column_counter).length == 0) {
                     $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
                 }
                 $('#bracket_column_'+column_counter).append( html );
-            }
-
-            if (i < 5 && i >= 4) {
-                column_counter = 1;
+            } else {
+                var column_counter = bracket_heat_info.column + 1;
                 if ($('#bracket_column_loser_' + column_counter).length == 0) {
                     $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
                 }
                 $('#bracket_column_loser_'+column_counter).append( html );
-            }
-
-            if (i < 6 && i >= 5) {
-                column_counter = 1;
-                if ($('#bracket_column_' + column_counter).length == 0) {
-                    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-                }
-                $('#bracket_column_'+column_counter).append( html );
-            }
-
-            if (i < 7 && i >= 6) {
-                column_counter = 1;
-                if ($('#bracket_column_loser_' + column_counter).length == 0) {
-                    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-                }
-                $('#bracket_column_loser_'+column_counter).append( html );
-            }
-
-            if (i < 8 && i >= 7) {
-                column_counter = 1;
-                if ($('#bracket_column_' + column_counter).length == 0) {
-                    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-                }
-                $('#bracket_column_'+column_counter).append( html );
-            }
-
-            if (i < 10 && i >= 8) {
-                column_counter = 2;
-                if ($('#bracket_column_loser_' + column_counter).length == 0) {
-                    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-                }
-                $('#bracket_column_loser_'+column_counter).append( html );
-            }
-
-            if (i < 11 && i >= 10) {
-                column_counter = 2;
-                if ($('#bracket_column_' + column_counter).length == 0) {
-                    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-                }
-                $('#bracket_column_'+column_counter).append( html );
-            }
-
-            if (i < 12 && i >= 11) {
-                column_counter = 3;
-                if ($('#bracket_column_loser_' + column_counter).length == 0) {
-                    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-                }
-                $('#bracket_column_loser_'+column_counter).append( html );
-            }
-
-            if (i < 13 && i >= 12) {
-                column_counter = 4;
-                if ($('#bracket_column_loser_' + column_counter).length == 0) {
-                    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-                }
-                $('#bracket_column_loser_'+column_counter).append( html );
-            }
-
-            if (i < 14 && i >= 13) {
-                column_counter = 3;
-                if ($('#bracket_column_' + column_counter).length == 0) {
-                    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-                }
-                $('#bracket_column_'+column_counter).append( html );
-            }
-        } else if (race_bracket_type == "fai32de") {
-            // double elimination, 32 pilots, FAI
-            if (i < 4) {        
-                column_counter = 0; 
-                if ($('#bracket_column_' + column_counter).length == 0) {
-                    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-                }
-                $('#bracket_column_'+column_counter).append( html );
-            }
-
-            if (i < 8 && i >= 4) {
-                column_counter = 1;
-                if ($('#bracket_column_' + column_counter).length == 0) {
-                    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-                }
-                $('#bracket_column_'+column_counter).append( html );
-            }
-
-            if (i < 12 && i >= 8) {
-                column_counter = 2;
-                if ($('#bracket_column_' + column_counter).length == 0) {
-                    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-                }
-                $('#bracket_column_'+column_counter).append( html );
-            }
-
-            if (i < 16 && i >= 12) {
-                column_counter = 1;
-                if ($('#bracket_column_loser_' + column_counter).length == 0) {
-                    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-                }
-                $('#bracket_column_loser_'+column_counter).append( html );
-            }
-
-            if (i < 20 && i >= 16) {
-                column_counter = 2;
-                if ($('#bracket_column_loser_' + column_counter).length == 0) {
-                    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-                }
-                $('#bracket_column_loser_'+column_counter).append( html );
-            }
-
-            if (i < 22 && i >= 20) {
-                column_counter = 3;
-                if ($('#bracket_column_loser_' + column_counter).length == 0) {
-                    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-                }
-                $('#bracket_column_loser_'+column_counter).append( html );
-            }
-
-            if (i < 24 && i >= 22) {
-                column_counter = 3;
-                if ($('#bracket_column_' + column_counter).length == 0) {
-                    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-                }
-                $('#bracket_column_'+column_counter).append( html );
-            }
-
-            if (i < 26 && i >= 24) {
-                column_counter = 4;
-                if ($('#bracket_column_loser_' + column_counter).length == 0) {
-                    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-                }
-                $('#bracket_column_loser_'+column_counter).append( html );
-            }
-
-            if (i < 27 && i >= 26) {
-                column_counter = 5;
-                if ($('#bracket_column_loser_' + column_counter).length == 0) {
-                    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-                }
-                $('#bracket_column_loser_'+column_counter).append( html );
-            }
-
-            if (i < 28 && i >= 27) {
-                column_counter = 4;
-                if ($('#bracket_column_' + column_counter).length == 0) {
-                    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-                }
-                $('#bracket_column_'+column_counter).append( html );
-            }
-
-            if (i < 29 && i >= 28) {
-                column_counter = 6;
-                if ($('#bracket_column_loser_' + column_counter).length == 0) {
-                    $('#loser_bracket_content').append('<div id="bracket_column_loser_'+column_counter+'" class="bracket_column"></div>');
-                }
-                $('#bracket_column_loser_'+column_counter).append( html );
-            }
-
-            if (i < 30 && i >= 29) {
-                column_counter = 5;
-                if ($('#bracket_column_' + column_counter).length == 0) {
-                    $('#winner_bracket_content').append('<div id="bracket_column_'+column_counter+'" class="bracket_column"></div>');
-                }
-                $('#bracket_column_'+column_counter).append( html );
             }
         }
     }

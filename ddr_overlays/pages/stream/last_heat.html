@@ -124,7 +124,7 @@
                 var race = msg.current;
             }
 
-            var heat = 0;
+            var heat_number = 0;
             if (ddr_race_data != undefined) {
                 // reason for this: race.heat counts heats of every class
                 // we need the heat number inside the current class
@@ -132,7 +132,7 @@
                 for (let i = 0; i < elimination_heats.length; i++) {
                     const this_heat = elimination_heats[i];
                     if (elimination_heats[i] == race.heat) {
-                        heat = i+1;
+                        heat_number = i+1;
                     }
                 }
             } else if (ddr_heat_data != undefined) {
@@ -140,7 +140,7 @@
                 for (let i = 0; i < ddr_heat_data.heats.length; i++) {
                     const this_heat = ddr_heat_data.heats[i];
                     if (this_heat.class_id == race_class_id) {
-                        ++heat;
+                        ++heat_number;
                         if (this_heat.id == race.heat) {
                             break;
                         }
@@ -148,103 +148,40 @@
                 }
             }
 
-            if (heat != 0) {
-                $('.curr_heat_title').html(race.displayname);
-
-                leaderboard_type = race.leaderboard.meta.primary_leaderboard;
-
-                $('#nextup_pilot_box').empty();
+            if (heat_number != 0) {
+                let heat_index = heat_number-1;
                 
-                // check that we have data from a race that has been completed
-                var FINISHED = true;
-                for (var i in race.leaderboard[leaderboard_type]) {
-                    if (race.leaderboard[leaderboard_type][i].position == null) {
-                        FINISHED = false;
-                    }
-                }
+                // refresh only when the heat is finished
+                if (race.status_msg) {
+                    $('.curr_heat_title').html(race.displayname);
 
-                if (FINISHED) {
+                    $('#nextup_pilot_box').empty();
+
                     build_nextup(race.leaderboard[leaderboard_type], 'current', race.leaderboard.meta, ddr_pilot_data, true);
 
-                    /*                       0                   1                      2          */
-                    var template_strings = ["Advance to Race ", "Go to Lower Bracket", "Eliminated"];
-                    if (race_bracket_type == "multigp16") {
-                        // double elimination, 16 pilots, MultiGP
-                        let each_heat_brings_to = {
-                            "1": [6, 1],   // winners of heat 1 advance to race 6 and losers of heat 1 go to template_strings[1] (= lower bracket)
-                            "2": [6, 1],
-                            "3": [8, 1],
-                            "4": [8, 1],
-                            "5": [9, 2],   // winners of heat 5 advance to race 9 and losers of heat 5 go to template_strings[2] (= eliminated)
-                            "6": [11, 1],
-                            "7": [10, 2],
-                            "8": [11, 1],
-                            "9": [12, 2],
-                            "10": [12, 2],
-                            "11": [14, 1],
-                            "12": [13, 2],
-                            "13": [14, 2]
-                        }
+                    var bracket_format_info = bracket_formats[race_bracket_type];
 
-                        if (heat >= 14) {
-                            // final heat
-                            $('#winner-cell').empty();
-                            $('#lower-cell').empty();
+                    let is_winner_bracket = (bracket_format_info[heat_index].type == "winner");
+                    let is_final_heat = (heat_number >= bracket_format_info[bracket_format_info.length-1].number);
+
+                    if (is_final_heat) {
+                        $('#winner-cell').empty();
+                        $('#lower-cell').empty();
+                    } else {
+                        // left side
+                        if (bracket_format_info[heat_index].advance_to != undefined) {
+                            $('#winner-cell').text("Advance to Race " + bracket_format_info[heat_index].advance_to);
+                        } else if (is_winner_bracket) {
+                            $('#winner-cell').text("Advance to Winner Bracket");
                         } else {
-                            $('#winner-cell').text(template_strings[0] + each_heat_brings_to[heat][0]);
-                            $('#lower-cell').text(template_strings[ each_heat_brings_to[heat][1] ]);
-                        }
-                    } else if (race_bracket_type == "fai32de") {
-                        // double elimination, 32 pilots, FAI
-
-                        // we can't use the same technique as in MultiGP because the winners of lower brackets sometimes advance to different heats
-                        // so just say that they advance without specifying to which heat :)
-                        let each_heat_brings_to = {
-                            "1": [0, 1],
-                            "2": [0, 1],
-                            "3": [0, 1],
-                            "4": [0, 1],
-                            "5": [0, 1],
-                            "6": [0, 1],
-                            "7": [0, 1],
-                            "8": [0, 1],
-                            "9": [0, 1],
-                            "10": [0, 1],
-                            "11": [0, 1],
-                            "12": [0, 1],
-                            "13": [0, 2],
-                            "14": [0, 2],
-                            "15": [0, 2],
-                            "16": [0, 2],
-                            "17": [0, 2],
-                            "18": [0, 2],
-                            "19": [0, 2],
-                            "20": [0, 2],
-                            "21": [0, 2],
-                            "22": [0, 2],
-                            "23": [0, 1],
-                            "24": [0, 1],
-                            "25": [0, 2],
-                            "26": [0, 2],
-                            "27": [0, 2],
-                            "28": [0, 1],
-                            "29": [0, 2],
+                            $('#winner-cell').text("Advance to Lower Bracket");
                         }
 
-                        if (heat >= 30) {
-                            // final heat
-                            $('#winner-cell').empty();
-                            $('#lower-cell').empty();
+                        // right side
+                        if (is_winner_bracket) {
+                            $('#lower-cell').text("Go to Lower Bracket");
                         } else {
-                            let is_winner_bracket = (each_heat_brings_to[heat][1] == 1);
-                            if (heat == 28 || heat == 29) {
-                                $('#winner-cell').text("Advance to Final");
-                            } else if (is_winner_bracket) {
-                                $('#winner-cell').text("Advance to Winner Bracket");
-                            } else {
-                                $('#winner-cell').text("Advance to Lower Bracket");
-                            }
-                            $('#lower-cell').text(template_strings[ each_heat_brings_to[heat][1] ]);
+                            $('#lower-cell').text("Eliminated");
                         }
                     }
                 }
