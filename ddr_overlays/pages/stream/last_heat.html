@@ -149,14 +149,15 @@
             }
 
             if (heat_number != 0) {
-                let heat_index = heat_number-1;
-                
                 // refresh only when the heat is finished
                 if (race.status_msg) {
+                    let heat_index = heat_number-1;
+
                     $('.curr_heat_title').html(race.displayname);
 
                     $('#nextup_pilot_box').empty();
 
+                    var leaderboard_type = race.leaderboard.meta.primary_leaderboard;
                     build_nextup(race.leaderboard[leaderboard_type], 'current', race.leaderboard.meta, ddr_pilot_data, true);
 
                     var bracket_format_info = bracket_formats[race_bracket_type];
