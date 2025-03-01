@@ -186,9 +186,11 @@ function build_nextup(leaderboard, display_type, meta, ddr_pilot_data, show_posi
             let position_strings = ["1st", "2nd", "3rd", "4th"];
             html += '<div class="nextup_pilot_position">'+ position_strings[i] +'</div>';
             $('#nextup_pilot_box').height(480);  // give more space to show positions (overriding CSS)
-            // that's the place where you can add other info such as fastest lap
+            // that's the place where you can add other info such as fastest lap:
+            // var fastest_lap = leaderboard[i].fastest_lap;
+            // var consecutives = leaderboard[i].consecutives;
         }
-        html += '<div class="nextup_pilot_avatar"><div class="nextup_pilot_avatar_mask"><img src="'+pilotImg+'" alt="Avatar"></div></div><div class="nextup_pilot_flag"><div class="nextup_pilot_flag_mask"><img src="/ddr_overlays/static/imgs/flags/'+flag+'.jpg"></div></div><div class="nextup_pilot_name">'+pilot_name+'</div></div>';
+        html += '<div class="nextup_pilot_avatar"><div class="nextup_pilot_avatar_mask"><img src="' + pilotImg + '" alt="Avatar"></div></div><div class="nextup_pilot_flag"><div class="nextup_pilot_flag_mask"><img src="/ddr_overlays/static/imgs/flags/'+flag+'.jpg"></div></div><div class="nextup_pilot_name">' + pilot_name + '</div></div>';
 
         $('#nextup_pilot_box').append(html);
     }

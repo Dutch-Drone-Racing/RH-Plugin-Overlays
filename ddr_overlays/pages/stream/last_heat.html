@@ -50,6 +50,7 @@
         'language',
         'pilot_data',
         'result_data',
+        'heat_data',
         'leaderboard',
         'class_data',
         'race_status'
@@ -97,6 +98,10 @@
             ddr_race_data = msg;
         });
 
+        socket.on('heat_data', function (msg) {
+            ddr_heat_data = msg;
+        });
+
         socket.on('class_data', function (msg) {
             ddr_class_data = msg.classes;
 
@@ -128,6 +133,17 @@
                     const this_heat = elimination_heats[i];
                     if (elimination_heats[i] == race.heat) {
                         heat = i+1;
+                    }
+                }
+            } else if (ddr_heat_data != undefined) {
+                // alternative method if ddr_race_data is not available
+                for (let i = 0; i < ddr_heat_data.heats.length; i++) {
+                    const this_heat = ddr_heat_data.heats[i];
+                    if (this_heat.class_id == race_class_id) {
+                        ++heat;
+                        if (this_heat.id == race.heat) {
+                            break;
+                        }
                     }
                 }
             }

@@ -75,7 +75,7 @@
             let bracket_type = document.getElementById("bracket_type").value;
             let class_id = document.getElementById("class_id").value;
             let finalUrl = baseURL + "/" + encodeURIComponent(bracket_type) + "/" + encodeURIComponent(class_id);
-            window.open(finalUrl, '__blank');
+            window.open(finalUrl, '_blank' + Math.random());
         };
     </script>
 

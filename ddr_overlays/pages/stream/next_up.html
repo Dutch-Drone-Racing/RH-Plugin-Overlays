@@ -102,10 +102,6 @@
             leaderboard_type = race.leaderboard.meta.primary_leaderboard;
             $('#nextup_pilot_box').empty();
             build_nextup(race.leaderboard[leaderboard_type], 'current', race.leaderboard.meta, ddr_pilot_data);
-            // da questa leaerboard posso tirare fuori tranquillamente il best lap e il tempo su tre giri
-            // servirebbe un modo per identificare l'ultima heat e la prossima senza dipendere dal direttore di gara che muove cose
-            // sfortunatamente 'result_data' ti dà solo le heat completate, non quelle ancora da fare
-            // quelle ancora da fare arrivano qua tramite leaderboard e avrai current e last_race dove current è quella selezionata e last_race l'ultima salvata...
         });
 
         socket.on('result_data', function (msg) {
