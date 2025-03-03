@@ -7,12 +7,13 @@ Stream overlays for RotorHazard as a plugin. You can use these in OBS or any oth
 
 ## Overlays
 - Single Pilot Node
+- Live Results
 - Race Status Bar
-- 'Next Up' display
 - Qualifier Leaderboard
 - Qualifier Leaderboard / 4 pages
 - Brackets
 - 'Last Heat' display
+- 'Next Up' display
 
 ## Installation
 Download the latest release and put the **ddr_overlays** folder in the **plugins** folder of your RotorHazard installation. (Re-)Start your RotorHazard server.
