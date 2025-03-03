@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="RotorHazard">
+    <meta name="google" content="notranslate">
+    <title>{{ __('Stream') }}: {{ __('Current Race') }}</title>
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/image/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/image/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/image/favicon-16x16.png">
+    <link rel="manifest" href="/static/image/site.webmanifest">
+    <link rel="mask-icon" href="/static/image/safari-pinned-tab.svg" color="#ee7a28">
+    <link rel="shortcut icon" href="/static/image/favicon.ico">
+    <meta name="msapplication-TileColor" content="#ee7a28">
+    <meta name="msapplication-config" content="/static/image/browserconfig.xml">
+    <meta name="theme-color" content="#224873">
+
+    <!-- Scripts -->
+    <script type="text/javascript" src="/static/jquery-3.6.4/jquery-3.6.4.min.js"></script>
+    <script type="text/javascript" src="/static/articulate/articulate.min.js"></script>
+    <script type="text/javascript" src="/static/socket.io-4.6.1/socket.io.min.js"></script>
+    <script type="text/javascript" src="/static/smoothie/smoothie.js"></script>
+    <script type="text/javascript" src="/static/magnific-1.1.0/magnific-inline-min.js"></script>
+    <script type="text/javascript" src="/static/svgasset.js"></script>
+    <script type="text/javascript" src="/static/rotorhazard.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/ddr_overlays/static/css/results.css"></link>
+
+    <!-- Child template head content -->
+
+</head>
+
+<body>
+
+<script type="text/javascript" charset="utf-8" src="/ddr_overlays/static/js/ddr_overlays.js"></script>
+
+<script type="text/javascript" charset="utf-8">
+
+    var data_dependencies = [
+        'all_languages',
+        'language',
+        'result_data',
+        'current_laps',
+        'pilot_data',
+        'leaderboard',
+        'race_status',
+    ];
+
+    rotorhazard.show_messages = false;
+
+    var ddr_pilot_data;
+
+    function race_kickoff(msg) {
+        rotorhazard.timer.stopAll();
+
+        var staging_start_pi = (msg.pi_staging_at_s * 1000); // convert seconds (pi) to millis (JS)
+        var race_start_pi = (msg.pi_starts_at_s * 1000); // convert seconds (pi) to millis (JS)
+
+        rotorhazard.timer.race.hidden_staging = Boolean(msg.hide_stage_timer);
+        rotorhazard.timer.race.count_up = Boolean(msg.unlimited_time);
+        rotorhazard.timer.race.duration_tenths = msg.race_time_sec * 10;
+
+        rotorhazard.timer.race.start(race_start_pi, staging_start_pi);
+    }
+
+    $(document).ready(function () {
+        // get pi time
+        rotorhazard.pi_time_request = window.performance.now();
+        socket.emit('get_pi_time');
+
+        $('.timing-clock .warning').hide();
+
+        socket.on('pi_time', default_handler['pi_time']);
+
+        socket.on('language', default_handler['language']);
+
+        // set up node local store
+        //for (i = 0; i < {{ num_nodes }}; i++) {
+        //    rotorhazard.nodes[i] = new nodeModel();
+        //}
+
+        socket.on('race_scheduled', default_handler['race_scheduled']);
+
+        socket.on('race_status', default_handler['race_status']);
+
+        socket.on('heartbeat', default_handler['heartbeat']);
+        
+        var current_laps = {};
+        socket.on('current_laps', function (msg) {
+            if (msg && 'last_race' in msg) {
+                current_laps = msg.last_race;
+            } else {
+                current_laps = msg.current;
+            }
+        });
+
+        socket.on('pilot_data', function (msg) {
+            rotorhazard.event.pilot_attributes = msg.attributes;
+            rotorhazard.event.pilots = msg.pilots;
+            rotorhazard.options.pilotSort = msg.pilotSort;
+            ddr_pilot_data = msg.pilots;    
+        });
+
+        socket.on('leaderboard', function (msg) {
+            if (msg && 'last_race' in msg) {
+                race = msg.last_race;
+            } else {
+                race = msg.current;
+            }
+
+            $('.current_heat').html(race.displayname);
+            
+            leaderboard_type = race.leaderboard.meta.primary_leaderboard;
+            $('#leaderboard').empty();
+            $('#leaderboard').append(build_leaderboard(race.leaderboard[leaderboard_type], 'current', race.leaderboard.meta, ddr_pilot_data.length, ddr_pilot_data));
+
+            var this_leaderboard = race.leaderboard[leaderboard_type];
+            var pilot_to_laps = {};
+            for (var i in this_leaderboard) {
+                var this_callsign = this_leaderboard[i].callsign;
+                pilot_to_laps[this_callsign] = "";
+                for (var j in current_laps.node_index) {
+                    if (current_laps.node_index[j].pilot?.callsign == this_callsign) {
+                        for (var k in current_laps.node_index[j].laps) {
+                            var this_lap = current_laps.node_index[j].laps[k];
+                            pilot_to_laps[this_callsign] += this_lap.lap_time + "<br/>";
+                        }
+                        break;
+                    }
+                }
+                $('#leaderboard td.laps').eq(i).html(pilot_to_laps[this_callsign]);
+            }
+            
+            $('#team_leaderboard').empty();
+            if (race.team_leaderboard && 'meta' in race.team_leaderboard) {
+                leaderboard_type = race.team_leaderboard.meta.primary_leaderboard;
+                $('#team_leaderboard').append(build_team_leaderboard(race.team_leaderboard[leaderboard_type], leaderboard_type, race.team_leaderboard.meta));
+                $('#team_leaderboard').show();
+            } else {
+                $('#team_leaderboard').hide();
+            }
+
+            if (race.status_msg) {
+                $('.race_status_message').html(race.status_msg);
+                $('.race_status_message').slideDown();
+            } else {
+                $('.race_status_message').slideUp();
+            }
+        });
+
+        socket.on('prestage_ready', default_handler['prestage_ready']);
+
+        socket.on('stage_ready', default_handler['stage_ready']);
+
+        socket.on('stop_timer', default_handler['stop_timer']);
+    });
+
+</script>
+
+<main class="page-stream" style="background: #00ff00;">
+    <div id="header">
+        <h1 class="current_heat">{{ __('Loading...') }}</h1>
+        <div id="timer">
+            <div class="timing-clock">
+                <div class="warning">
+                    <!-- <div class="symbol">&#9888;&#xFE0E; {{ __('Sync') }}</div> -->
+                    <!-- <div class="value">{{ __('Acquiring') }}</div> -->
+                </div>
+                <div class="time-display">--:--</div>
+            </div>
+        </div>
+    </div>
+
+    <!--Display the race leaderboard-->
+    <div id="leaderboard"></div>
+
+    <div id="team_leaderboard"></div>
+
+    <div class="race_status_message"></div>
+</div>
+
+</main>
+
+</body>
+
+</html>

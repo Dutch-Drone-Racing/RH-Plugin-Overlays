@@ -196,7 +196,7 @@ function build_nextup(leaderboard, display_type, meta, ddr_pilot_data, show_posi
     }
 }
 
-function build_leaderboard(leaderboard, display_type, meta, number_of_pilots=999, display_starts=false) {
+function build_leaderboard(leaderboard, display_type, meta, number_of_pilots=999, ddr_pilot_data=[], display_starts=false) {
     if (typeof(display_type) === 'undefined') {
         var display_type = 'by_race_time';
     }
@@ -285,7 +285,8 @@ function build_leaderboard(leaderboard, display_type, meta, number_of_pilots=999
 
             row.append('<td class="avatar"><img src=" ' + pilotImg + ' "></td>');
 
-            row.append('<td class="flag" id="pilot_id_flag_' + leaderboard[i].pilot_id + '"><img class="country_flag" src="/ddr_overlays/static/imgs/flags/nl.jpg"></td>');
+            let flag = getPilotFlag(leaderboard[i].pilot_id, ddr_pilot_data);
+            row.append('<td class="flag" id="pilot_id_flag_' + leaderboard[i].pilot_id + '"><img class="country_flag" src="/ddr_overlays/static/imgs/flags/' + flag + '.jpg".jpg"></td>');
 
             country_flag = '';
             var pilot_name_flag = leaderboard[i].callsign;
@@ -411,6 +412,7 @@ function getPilotFlag(pilot_id, ddr_pilot_data) {
             break;
         }
     }
+    return 'it';
 }
 
 function imageExists(image_url) {

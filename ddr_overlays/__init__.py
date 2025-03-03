@@ -40,17 +40,16 @@ def initialize(rhapi):
         return templating.render_template('ddr_overlay_index.html', serverInfo=None, getOption=rhapi.db.option, __=rhapi.__)
 
     ### bar ###
+    @bp.route('/ddr_overlays/stream/results')
+    def ddr_overlays_streamResults():
+        return templating.render_template('stream/results.html', serverInfo=None, getOption=rhapi.db.option, __=rhapi.__, DEBUG=False)
+
+    ### bar ###
     @bp.route('/ddr_overlays/stream/bar')
     def ddr_overlays_streamBar():
         return templating.render_template('stream/bar.html', serverInfo=None, getOption=rhapi.db.option, __=rhapi.__, DEBUG=False)
 
     ### overlays based on bracket type and class ###
-    @bp.route('/ddr_overlays/stream/next_up/<string:bracket_type>/<int:class_id>')
-    def ddr_overlays_streamNextUp(bracket_type, class_id):
-        return templating.render_template('stream/next_up.html', serverInfo=None, getOption=rhapi.db.option, __=rhapi.__, DEBUG=False,
-            bracket_type=bracket_type, class_id=class_id, num_nodes=8
-        )
-
     @bp.route('/ddr_overlays/stream/leaderboard/<string:bracket_type>/<int:class_id>')
     def ddr_overlays_streamLeaderboard(bracket_type, class_id):
         return templating.render_template('stream/leaderboard.html', serverInfo=None, getOption=rhapi.db.option, __=rhapi.__, DEBUG=False,
@@ -73,6 +72,12 @@ def initialize(rhapi):
     def ddr_overlays_streamLastHeat(bracket_type, class_id):
         return templating.render_template('stream/last_heat.html', serverInfo=None, getOption=rhapi.db.option, __=rhapi.__, DEBUG=False,
             bracket_type=bracket_type, class_id=class_id
+        )
+
+    @bp.route('/ddr_overlays/stream/next_up/<string:bracket_type>/<int:class_id>')
+    def ddr_overlays_streamNextUp(bracket_type, class_id):
+        return templating.render_template('stream/next_up.html', serverInfo=None, getOption=rhapi.db.option, __=rhapi.__, DEBUG=False,
+            bracket_type=bracket_type, class_id=class_id, num_nodes=8
         )
     ################################################
 
