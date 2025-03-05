@@ -134,7 +134,7 @@
                         break;
                     }
                 }
-                $('#leaderboard td.laps').eq(i).html(pilot_to_laps[this_callsign]);
+                $('#leaderboard td.laps').eq(i).html(pilot_to_laps[this_callsign] ? pilot_to_laps[this_callsign] : "—");
             }
             
             $('#team_leaderboard').empty();
@@ -163,7 +163,7 @@
 
 </script>
 
-<main class="page-stream" style="background: #00ff00;">
+<main class="page-stream">
     <div id="header">
         <h1 class="current_heat">{{ __('Loading...') }}</h1>
         <div id="timer">

@@ -40,7 +40,7 @@ body {
 h1 {
     font-size: 2rem;
     padding: 1.5rem 0.5rem;
-    background: #00ff00;
+    background: #000000BC;
     color: #ffffff;
     margin: 0;
     font-weight: bold;
@@ -57,7 +57,7 @@ table {
     border-collapse: collapse;
     min-width: 100%;
     border: solid 1px #d1d3d4;
-    background: #00ff00;
+    background: #000000BC;
     height: 100%;
 }
 
@@ -97,13 +97,41 @@ td.pos {
     font-size: 3rem;
 }
 
+td.avatar {
+    width: 200px;
+    height: 200px;
+    /*border-radius: 50%;*/
+    /*background-color: #b9b9b9;*/
+    margin: 12px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+td.avatar img {
+    width: 75%;
+    height: 75%;
+    object-fit: contain;
+}
+
+/*td.flag {
+    width: 100%;
+    text-align: center;
+    padding-top: 16px;
+}*/
+
+td.flag img {
+    width: 25%;
+    height: 25%;
+    object-fit: contain;
+}
+
 .screen-reader-text {
     clip: rect(1px, 1px, 1px, 1px);
     position: absolute;
 }
 
 .channel-block {
-    background: #00ff00;
+    background: #000000BC;
     color: #ffffff;
     line-height: 1;
     vertical-align: top;
@@ -149,7 +177,7 @@ td.pos {
 .timing-clock {
     font-size: 3rem;
     line-height: 1;
-    background: #00ff00;
+    background: #000000BC;
     color: #ffffff;
     border-radius: 0.5rem;
     padding: 1rem 0;
@@ -161,15 +189,15 @@ td.pos {
 }
 
 .race-running .timing-clock {
-    background: #00ff00;
+    background: #000000BC;
 }
 
 .race-stopped .timing-clock {
-    background: #00ff00;
+    background: #000000BC;
 }
 
 .timing-clock.staging {
-    background: #00ff00;
+    background: #000000BC;
     color: #000;
 }
 

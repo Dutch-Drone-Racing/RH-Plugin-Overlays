@@ -150,6 +150,8 @@
 
             if (heat_number != 0) {
                 // refresh only when the heat is finished
+                // corner case (quite useless but just for fun): if a heat has only one pilot, it doesn't generate the "Winner is <pilot>" status message at the end,
+                // hence the overlay is not updated :D
                 if (race.status_msg) {
                     let heat_index = heat_number-1;
 
@@ -165,6 +167,7 @@
                     let is_winner_bracket = (bracket_format_info[heat_index].type == "winner");
                     let is_final_heat = (heat_number >= bracket_format_info[bracket_format_info.length-1].number);
 
+                    // the result is nicely placed for heats with four pilots
                     if (is_final_heat) {
                         $('#winner-cell').empty();
                         $('#lower-cell').empty();

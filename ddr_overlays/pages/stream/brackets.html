@@ -51,12 +51,14 @@
         'all_languages',
         'language',
         'pilot_data',
+        'class_data',
         'heat_data',
     ];
 
     rotorhazard.show_messages = false;
 
     var ddr_pilot_data;
+    var ddr_class_data;
     var ddr_heat_data;
 
     function race_kickoff(msg) {
@@ -88,9 +90,13 @@
             ddr_pilot_data = msg.pilots;    
         }); 
 
+        socket.on('class_data', function (msg) {
+            ddr_class_data = msg.classes;
+        });
+
         socket.on('heat_data', function (msg) {
             ddr_heat_data = msg.heats;
-            build_elimination_brackets('{{ bracket_type }}', '{{ class_id }}', ddr_heat_data, ddr_pilot_data);
+            build_elimination_brackets('{{ bracket_type }}', '{{ class_id }}', ddr_pilot_data, ddr_heat_data, ddr_class_data);
         });
 
         socket.on('heartbeat', default_handler['heartbeat']);

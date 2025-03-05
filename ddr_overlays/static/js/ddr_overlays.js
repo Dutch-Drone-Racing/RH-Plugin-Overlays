@@ -528,7 +528,7 @@ const bracket_formats = {
     //"fai64de":   []
 }
 
-function build_elimination_brackets(race_bracket_type, race_class_id, ddr_heat_data, ddr_pilot_data) {
+function build_elimination_brackets(race_bracket_type, race_class_id, ddr_pilot_data, ddr_heat_data, ddr_class_data) {
 
     // clear brackets
     $('#winner_bracket_content').html('');
@@ -559,7 +559,7 @@ function build_elimination_brackets(race_bracket_type, race_class_id, ddr_heat_d
 
             if (slot.pilot_id === 0) {
                 if (slot.method > -1 && !(slot.method == 0 && !slot.pilot_id)) {
-                    var method_text = get_method_descriptor(ddr_pilot_data, slot.method, slot.seed_id, slot.seed_rank, slot.pilot_id)
+                    var method_text = get_method_descriptor(ddr_pilot_data, ddr_heat_data, ddr_class_data, slot.method, slot.seed_id, slot.seed_rank, slot.pilot_id)
                     html += '<div class="bracket_race_pilot">';
                     html += '<div class="no_pilot">' + method_text + '</div>';
                     html += '</div>';
@@ -605,9 +605,9 @@ function build_elimination_brackets(race_bracket_type, race_class_id, ddr_heat_d
     }
 }
 
-function get_method_descriptor(ddr_pilot_data, method, seed, rank, pilot_id) {
+function get_method_descriptor(ddr_pilot_data, ddr_heat_data, ddr_class_data, method, seed, rank, pilot_id) {
     if (method == 0) { // pilot
-        var pilot = ddr_pilot_data.find(obj => {return obj.pilot_id == pilot_id});
+        var pilot =  ddr_pilot_data?.find(obj => {return obj.pilot_id == pilot_id});
 
         if (pilot) {
             return pilot.callsign;
@@ -615,7 +615,7 @@ function get_method_descriptor(ddr_pilot_data, method, seed, rank, pilot_id) {
             return false;
         }
     } else if (method == 1) { // heat
-        var heat = ddr_heat_data.find(obj => {return obj.id == seed});
+        var heat = ddr_heat_data?.find(obj => {return obj.id == seed});
 
         if (heat) {
             return heat.displayname + " " + __('Rank') + " " + rank;
@@ -623,7 +623,7 @@ function get_method_descriptor(ddr_pilot_data, method, seed, rank, pilot_id) {
             return false;
         }
     } else if (method == 2) { // class
-        var race_class = ddr_class_data.find(obj => {return obj.id == seed});
+        var race_class = ddr_class_data?.find(obj => {return obj.id == seed});
 
         if (race_class) {
             return race_class.displayname + " " + __('Rank') + " " + rank;
