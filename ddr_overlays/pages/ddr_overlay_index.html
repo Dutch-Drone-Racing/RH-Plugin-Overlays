@@ -58,7 +58,7 @@
                     if (![...selectElement.options].some(option => option.value === race_class)) {
                         const option = document.createElement('option');
                         option.value = race_class.id;
-                        option.textContent = race_class.name;
+                        option.textContent = race_class.name ? race_class.name : __('Class') + ' ' + race_class.id;
                         selectElement.appendChild(option);
                     }
                 });
@@ -119,6 +119,7 @@
     <div class="text-center mb-5">
         <h3>{{ __("Overlays")}}:</h3>
 
+        <div class="form-container text-center mb-5">
         <form id="ddr_form">
             <label for="bracket_type">Bracket type:</label>
             <select id="bracket_type">
@@ -137,21 +138,85 @@
             <select id="class_id">
                 <!-- <option value="class.id">class.name</option> -->
             </select>
+
+            <br>
         </form>
+        </div>
 
-        <p><a href="/ddr_overlays/stream/results" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Live Results")}} (1920x800)</a></p>
+    <style>
+        .form-container {
+            padding: 20px;
+            margin-left: 35%;
+            margin-right: 35%;
+            border: 2px solid black;
+        }
+        label, input {
+            width: 100%;
+            margin-bottom: 10px;
+        }
 
-        <p><a href="/ddr_overlays/stream/bar?nologo=1" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Status Bar")}} (1920x200)</a></p>
+        table {
+            width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
 
-        <p><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/leaderboard")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Qualifier Leaderboard - Fullscreen")}} (1920x1080)</a></p>
-
-        <p><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/leaderboard_pages")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Qualifier Leaderboard - Pages")}} (1920x600)</a></p>
-
-        <p><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/brackets")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Brackets")}} (1920x2000)</a></p>
-
-        <p><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/last_heat")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Last Heat")}} (1920x800)</a></p>
-
-        <p><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/next_up")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Next Up")}} (1920x800)</a></p>
+    <table>
+        <thead>
+            <tr>
+                <th>Link</th>
+                <th>Description</th>
+                <th>Required parameters</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><a href="/ddr_overlays/stream/results" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Live Results")}} (1920x800)</a></td>
+                <td>Panel with real time positions and lap times</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td><a href="/ddr_overlays/stream/bar?nologo=1" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Status Bar")}} (1920x200)</a></td>
+                <td>Status Bar</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/leaderboard")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Qualifier Leaderboard - Fullscreen")}} (1920x1080)</a></td>
+                <td>Current leaderboard on a single page, designed for qualifier results</td>
+                <td>Bracket type<br>Qualifier class</td>
+            </tr>
+            <tr>
+                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/leaderboard_pages")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Qualifier Leaderboard - Pages")}} (1920x600)</a></td>
+                <td>Current leaderboard divided in pages of 8 pilots each, designed for qualifier results</td>
+                <td>Bracket type<br>Qualifier class</td>
+            </tr>
+            <tr>
+                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/brackets")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Brackets")}} (1920x2000)</a></td>
+                <td>Bracket diagram of elimination stage</td>
+                <td>Bracket type<br>Race class</td>
+            </tr>
+            <tr>
+                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/last_heat")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Last Heat")}} (1920x800)</a></td>
+                <td>Results of the last heat of elimination stage</td>
+                <td>Bracket type<br>Race class</td>
+            </tr>
+            <tr>
+                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/next_up")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Next Up")}} (1920x800)</a></td>
+                <td>Preview of the next heat</td>
+                <td>-</td>
+            </tr>
+        </tbody>
+    </table>
     </div>
 
     <div class="text-center mb-5">

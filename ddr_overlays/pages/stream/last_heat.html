@@ -106,7 +106,7 @@
             ddr_class_data = msg.classes;
 
             Object.values(ddr_class_data).forEach(race_class => {
-                if (race_class.id === race_class_id) {
+                if (race_class.id == race_class_id) {
                     console.log(race_class);
                     race_class_name = race_class.name;
                 }
