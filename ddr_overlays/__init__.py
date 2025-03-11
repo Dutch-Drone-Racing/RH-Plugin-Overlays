@@ -79,6 +79,12 @@ def initialize(rhapi):
         return templating.render_template('stream/next_up.html', serverInfo=None, getOption=rhapi.db.option, __=rhapi.__, DEBUG=False,
             bracket_type=bracket_type, class_id=class_id, num_nodes=8
         )
+
+    @bp.route('/ddr_overlays/stream/podium/<string:bracket_type>/<int:class_id>')
+    def ddr_overlays_streamPodium(bracket_type, class_id):
+        return templating.render_template('stream/podium.html', serverInfo=None, getOption=rhapi.db.option, __=rhapi.__, DEBUG=False,
+            bracket_type=bracket_type, class_id=class_id
+        )
     ################################################
 
     ### node ###
