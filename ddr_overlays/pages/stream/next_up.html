@@ -50,7 +50,6 @@
         'language',
         'pilot_data',
         'leaderboard',
-        'result_data',
         'race_status'
     ];
 
@@ -102,10 +101,6 @@
             leaderboard_type = race.leaderboard.meta.primary_leaderboard;
             $('#nextup_pilot_box').empty();
             build_nextup(race.leaderboard[leaderboard_type], 'current', race.leaderboard.meta, ddr_pilot_data);
-        });
-
-        socket.on('result_data', function (msg) {
-            var test = msg;
         });
 
         socket.on('prestage_ready', default_handler['prestage_ready']);
