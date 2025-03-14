@@ -174,12 +174,8 @@ function build_nextup(leaderboard, display_type, meta, ddr_pilot_data, show_posi
     for (var i in leaderboard) {
 
         let pilot_name = leaderboard[i].callsign;       
-        let flag = getPilotFlag(leaderboard[i].pilot_id, ddr_pilot_data);
-
-        let pilotImg = '/static/user/avatars/' + leaderboard[i].callsign.replace(/ /g,"_").toLowerCase() + '.jpg';      
-        if (!imageExists(pilotImg)) {
-            pilotImg = '/ddr_overlays/static/imgs/no_avatar.png';
-        }
+        let flagImg = getFlagURL(leaderboard[i].pilot_id, ddr_pilot_data);
+        let pilotImg = getPilotImgURL(leaderboard[i]);
 
         let html = '<div class="nextup_pilot">';
         if (show_position) {
@@ -190,7 +186,7 @@ function build_nextup(leaderboard, display_type, meta, ddr_pilot_data, show_posi
             // var fastest_lap = leaderboard[i].fastest_lap;
             // var consecutives = leaderboard[i].consecutives;
         }
-        html += '<div class="nextup_pilot_avatar"><div class="nextup_pilot_avatar_mask"><img src="' + pilotImg + '" alt="Avatar"></div></div><div class="nextup_pilot_flag"><div class="nextup_pilot_flag_mask"><img src="/ddr_overlays/static/imgs/flags/'+flag+'.jpg"></div></div><div class="nextup_pilot_name">' + pilot_name + '</div></div>';
+        html += '<div class="nextup_pilot_avatar"><div class="nextup_pilot_avatar_mask"><img src="' + pilotImg + '" alt="Avatar"></div></div><div class="nextup_pilot_flag"><div class="nextup_pilot_flag_mask"><img src="' + flagImg + '"></div></div><div class="nextup_pilot_name">' + pilot_name + '</div></div>';
 
         $('#nextup_pilot_box').append(html);
     }
@@ -275,23 +271,15 @@ function build_leaderboard(leaderboard, display_type, meta, number_of_pilots=999
 
             row.append('<td class="pos">'+ (leaderboard[i].position != null ? leaderboard[i].position : '-') +'</td>');
 
-            // ADD AVATAR
-
-            var pilotImg = '/static/user/avatars/' + leaderboard[i].callsign.replace(/ /g,"_").toLowerCase() + '.jpg';
-
-            if (!imageExists(pilotImg)) {
-                pilotImg = '/ddr_overlays/static/imgs/no_avatar.png';
-            }
-
+            var pilotImg = getPilotImgURL(leaderboard[i]);
             row.append('<td class="avatar"><img src=" ' + pilotImg + ' "></td>');
 
-            let flag = getPilotFlag(leaderboard[i].pilot_id, ddr_pilot_data);
-            row.append('<td class="flag" id="pilot_id_flag_' + leaderboard[i].pilot_id + '"><img class="country_flag" src="/ddr_overlays/static/imgs/flags/' + flag + '.jpg".jpg"></td>');
+            let flagImg = getFlagURL(leaderboard[i].pilot_id, ddr_pilot_data);
+            row.append('<td class="flag" id="pilot_id_flag_' + leaderboard[i].pilot_id + '"><img class="country_flag" src="' + flagImg + '"></td>');
 
-            country_flag = '';
             var pilot_name_flag = leaderboard[i].callsign;
 
-            row.append('<td class="pilot">'+ pilot_name_flag +'</td>');
+            row.append('<td class="pilot">' + pilot_name_flag + '</td>');
             if (meta.team_racing_mode) {
                 row.append('<td class="team">' + leaderboard[i].team_name + '</td>');
             }
@@ -396,7 +384,11 @@ function build_leaderboard(leaderboard, display_type, meta, number_of_pilots=999
 
 
 
-/* Pilot flags */
+/* Pilot data retrieval */
+function getFlagURL(pilot_id, ddr_pilot_data) {
+    return '/ddr_overlays/static/imgs/flags/' + getPilotFlag(pilot_id, ddr_pilot_data) + '.jpg';
+}
+
 function getPilotFlag(pilot_id, ddr_pilot_data) {
     count = Object.keys(ddr_pilot_data).length;
     for (var i = 0; i < count; i++) {
@@ -413,6 +405,14 @@ function getPilotFlag(pilot_id, ddr_pilot_data) {
         }
     }
     return 'it';
+}
+
+function getPilotImgURL(pilot) {
+    let pilotImg = '/static/user/avatars/' + pilot.callsign.replace(/ /g,"_").toLowerCase() + '.jpg';      
+    if (!imageExists(pilotImg)) {
+        pilotImg = '/ddr_overlays/static/imgs/no_avatar.png';
+    }
+    return pilotImg;
 }
 
 function imageExists(image_url) {
@@ -565,17 +565,13 @@ function build_elimination_brackets(race_bracket_type, race_class_id, ddr_pilot_
                     html += '</div>';
                 }
             } else {
-                let flag = getPilotFlag(slot.pilot_id, ddr_pilot_data);
-
-                let pilotImg = '/static/user/avatars/' + pilot.callsign.replace(/ /g,"_").toLowerCase() + '.jpg';       
-                if (!imageExists(pilotImg)) {
-                    pilotImg = '/ddr_overlays/static/imgs/no_avatar.png';
-                }
+                let flagImg = getFlagURL(slot.pilot_id, ddr_pilot_data);
+                let pilotImg = getPilotImgURL(pilot);
 
                 html += '<div class="bracket_race_pilot">';
 
                 html += '<div class="avatar"><img src="' + pilotImg + '"></div>';
-                html += '<div class="flag"><img src="/ddr_overlays/static/imgs/flags/' + flag + '.jpg" alt="USA"></div>';
+                html += '<div class="flag"><img src="' + flagImg + '" alt="USA"></div>';
                 html += '<div class="pilot_name">' + pilot.callsign + '</div>';
 
                 html += '</div>';
