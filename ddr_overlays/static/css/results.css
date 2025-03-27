@@ -1,0 +1,248 @@
+@font-face {
+  font-family: teko, Arial, Helvetica, sans-serif;
+  font-style: normal;
+  font-weight: 800;
+}
+
+@font-face {
+  font-family: teko, Arial, Helvetica, sans-serif;
+  font-style: italic;
+  font-weight: 800;
+}
+
+@font-face {
+  font-family: teko, Arial, Helvetica, sans-serif;
+  font-style: normal;
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: teko, Arial, Helvetica, sans-serif;
+  font-style: italic;
+  font-weight: 700;
+}
+
+html {
+    background: transparent;
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+    font-family: teko, Arial, Helvetica, sans-serif;
+    font-variant-numeric: tabular-nums;
+}
+
+body {
+    font-size: 1.3em;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    font-size: 2rem;
+    padding: 1.5rem 0.5rem;
+    background: #000000BC;
+    color: #ffffff;
+    margin: 0;
+    font-weight: bold;
+    line-height: 1;
+    border-radius: 0.5rem;
+    text-shadow: 
+        -1px -1px 0 black,  
+         1px -1px 0 black,
+        -1px  1px 0 black,
+         1px  1px 0 black;
+}
+
+table {
+    border-collapse: collapse;
+    min-width: 100%;
+    border: solid 1px #d1d3d4;
+    background: #000000BC;
+    height: 100%;
+}
+
+th {
+    white-space: nowrap;
+}
+
+th, td {
+    padding: 0.25em;
+    text-align: right;
+    border-top: solid 1px #d1d3d4;
+    font-weight: bold;
+    text-shadow: 
+        -1px -1px 0 black,  
+         1px -1px 0 black,
+        -1px  1px 0 black,
+         1px  1px 0 black;
+}
+
+thead th {
+    height: 1.2em;
+    vertical-align: bottom;
+}
+
+tbody td {
+    vertical-align: middle;
+}
+
+main {
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 1rem);
+}
+
+td.pos {
+    font-size: 3rem;
+}
+
+td.avatar {
+    width: 200px;
+    height: 200px;
+    /*border-radius: 50%;*/
+    /*background-color: #b9b9b9;*/
+    margin: 12px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+td.avatar img {
+    width: 75%;
+    height: 75%;
+    object-fit: contain;
+}
+
+/*td.flag {
+    width: 100%;
+    text-align: center;
+    padding-top: 16px;
+}*/
+
+td.flag img {
+    width: 25%;
+    height: 25%;
+    object-fit: contain;
+}
+
+.screen-reader-text {
+    clip: rect(1px, 1px, 1px, 1px);
+    position: absolute;
+}
+
+.channel-block {
+    background: #000000BC;
+    color: #ffffff;
+    line-height: 1;
+    vertical-align: top;
+    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+    height: 100%;
+}
+
+.channel-block .ch {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin: 0.25rem;
+}
+
+.channel-block .fr {
+    font-size: 0.75em;
+    margin-top: 0;
+    margin: 0 0.25rem 0.25rem;
+}
+
+#header {
+    flex: 0 0 auto;
+    display: flex;
+    margin-bottom: 0.5rem;
+}
+
+#header h1 {
+    flex: 1 1 auto;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    display: block;
+}
+
+#timer {
+    flex: 0 0 17rem;
+    margin-left: 0.5rem;
+}
+
+.timing-clock {
+    font-size: 3rem;
+    line-height: 1;
+    background: #000000BC;
+    color: #ffffff;
+    border-radius: 0.5rem;
+    padding: 1rem 0;
+    display: block;
+    text-align: center;
+    font-weight: bold;
+    margin: 0;
+    position: relative;
+}
+
+.race-running .timing-clock {
+    background: #000000BC;
+}
+
+.race-stopped .timing-clock {
+    background: #000000BC;
+}
+
+.timing-clock.staging {
+    background: #000000BC;
+    color: #000;
+}
+
+.timing-clock .warning {
+    position: absolute;
+    left: 0.25em;
+    font-size: 1.2rem;
+    text-align: left;
+}
+
+#leaderboard {
+    flex: 1;
+}
+
+#team_leaderboard {
+    flex: 0.5;
+}
+
+.responsive-wrap {
+    height: 100%;
+}
+
+.leaderboard .pilot,
+.leaderboard .race_class {
+    text-align: left;
+}
+
+.leaderboard .race_class {
+    text-align: left;
+}
+
+.leaderboard .channel {
+    width: 5em;
+}
+
+.race_status_message {
+    padding: 1rem;
+    color: #ffffff;
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    display: none;
+    text-shadow: 
+        -1px -1px 0 black,  
+         1px -1px 0 black,
+        -1px  1px 0 black,
+         1px  1px 0 black;
+}

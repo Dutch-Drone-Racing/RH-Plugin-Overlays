@@ -2,264 +2,86 @@
 <html lang="en">
 
 <head>
-	<title>Dutch Drone Racing RotorHazard Plugin</title>
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dutch Drone Racing RotorHazard Plugin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-	<!-- Scripts -->
-	<script type="text/javascript" src="/static/jquery-3.6.4/jquery-3.6.4.min.js"></script>
-	<script type="text/javascript" src="/static/articulate/articulate.min.js"></script>
-	<script type="text/javascript" src="/static/socket.io-4.6.1/socket.io.min.js"></script>
-	<script type="text/javascript" src="/static/smoothie/smoothie.js"></script>
-	<script type="text/javascript" src="/static/magnific-1.1.0/magnific-inline-min.js"></script>
-	<script type="text/javascript" src="/static/svgasset.js"></script>
-	<script type="text/javascript" src="/static/rh-ui.js"></script>
-	<script type="text/javascript" src="/static/rotorhazard.js"></script>
+    <!-- Scripts -->
+    <script type="text/javascript" src="/static/jquery-3.6.4/jquery-3.6.4.min.js"></script>
+    <script type="text/javascript" src="/static/articulate/articulate.min.js"></script>
+    <script type="text/javascript" src="/static/socket.io-4.6.1/socket.io.min.js"></script>
+    <script type="text/javascript" src="/static/smoothie/smoothie.js"></script>
+    <script type="text/javascript" src="/static/magnific-1.1.0/magnific-inline-min.js"></script>
+    <script type="text/javascript" src="/static/svgasset.js"></script>
+    <script type="text/javascript" src="/static/rh-ui.js"></script>
+    <script type="text/javascript" src="/static/rotorhazard.js"></script>
 
-	<script>
-		var data_dependencies = [
-			'all_languages',
-			'language',
-			'result_data',
-			'pilot_data'
-		];
+    <script>
+        var data_dependencies = [
+            'all_languages',
+            'language',
+            'result_data',
+            'pilot_data',
+            'class_data',
+        ];
 
-		$(document).ready(function () {
-			socket.on('language', function (msg) {
-				if (msg.language) {
-					rotorhazard.interface_language = msg.language;
-				}
-			});
-		});
-	</script>
+        rotorhazard.show_messages = false;
+
+        var ddr_class_data;
+
+        $(document).ready(function () {
+            socket.on('language', function (msg) {
+                if (msg.language) {
+                    rotorhazard.interface_language = msg.language;
+                }
+            });
+
+            socket.on('class_data', function (msg) {
+                ddr_class_data = msg.classes;
+
+                const selectElement = document.getElementById("class_id");
+
+                // save selected value
+                const selectedValue = selectElement.value;
+
+                // efficient update of class list
+                const newOptionsSet = new Set(ddr_class_data);
+
+                // remove classes
+                Array.from(selectElement.options).forEach(option => {
+                    if (!newOptionsSet.has(option.value)) {
+                        option.remove();
+                    }
+                });
+
+                // add classes
+                Object.values(ddr_class_data).forEach(race_class => {
+                    if (![...selectElement.options].some(option => option.value === race_class)) {
+                        const option = document.createElement('option');
+                        option.value = race_class.id;
+                        option.textContent = race_class.name ? race_class.name : __('Class') + ' ' + race_class.id;
+                        selectElement.appendChild(option);
+                    }
+                });
+
+                // restore selected value
+                if (newOptionsSet.has(selectedValue)) {
+                    selectElement.value = selectedValue;
+                }
+            });
+        });
+
+        function openDynamicLink(event, baseURL) {
+            event.preventDefault();
+            let bracket_type = document.getElementById("bracket_type").value;
+            let class_id = document.getElementById("class_id").value;
+            let finalUrl = baseURL + "/" + encodeURIComponent(bracket_type) + "/" + encodeURIComponent(class_id);
+            window.open(finalUrl, '_blank' + Math.random());
+        };
+    </script>
 
 </head>
 
 <body>
-
-	<header>
-		<img src="/ddr_overlays/static/imgs/ddr_logo_white.png" alt="DDR Logo" height="48px"> 
-	</header>
-
-
-	<h2 class="text-center">DDR Overlays Plugin</h2>
-	<hr>
-
-	<div class="text-center mb-5">
-		<h3>{{ __("Important Information")}}:</h3>
-		<p style="max-width: 700px; margin: 0 auto;">
-			The resolutions displayed are a suggestion based on readability and our setup. You can try different resolutions and see what fits best for your stream.
-		</p>
-
-		<br>
-		<p style="max-width: 700px; margin: 0 auto;"><b>Pilot Avatars</b><br>
-			Pilot avatars are obtained from the /server/static/user/avatars/ folder. The file name should be the pilot's callsign in lowercase where spaces has been replaced for underscores (_) and in the .jpg file type. The file should be a square image, preferably 256x256 pixels. If no avatar is found it will show the default avatar.
-		</p>
-
-		<br>
-		<p style="max-width: 700px; margin: 0 auto;"><b>Country Flags</b><br>
-			A country can be set as pilot attribute in the pilots tab (dropdown). When set it shows the flag icon before the pilot's callsign.
-		</p>
-
-		<br>
-		<p style="max-width: 700px; margin: 0 auto;"><b>Brackets</b><br>
-			For now supported brackets are 32 double-elimination (FAI, 4-up, 32-pilot) and 16 double-elimination (MultiGP, 4-up, 16-pilot). Others will follow.
-			<br><br>
-			The advice is to load the whole page as 1 source in OBS and then make 2 scenes, one for the Winner Bracket and one for the Lower Bracket and crop the source accordingly. This way you can easily switch between the two.
-		</p>
-	</div>
-
-	<!--
-	<div class="text-center mb-5">
-		<h3>{{ __("Functions")}}:</h3>
-
-		<p><a href="/fpvscores/qr_scanner" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Pilot Check-in")}}</a></p>
-	</div>
-	-->
-
-	<div class="text-center mb-5">
-		<h3>{{ __("Overlays")}}:</h3>
-
-		<p><a href="/ddr_overlays/stream/bar?nologo=1" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Status Bar")}} (1920x200)</a></p>
-		<p><a href="/ddr_overlays/stream/next_up" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Next Up")}} (1920x800)</a></p>
-
-		<p><a href="/ddr_overlays/stream/leaderboard/0" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Leaderboard Top 32 - Fullscreen")}} (1920x1080)</a></p>
-		<p><a href="/ddr_overlays/stream/leaderboard_pages/0" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Leaderboard Top 32 - Pages")}} (1920x600)</a></p>
-
-		<p><a href="/ddr_overlays/stream/brackets/1/32/Regulation bracket, double elimination" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Brackets - 32-pilot, double-elimination, FAI")}} (1920x2000)</a></p>
-
-		<p><a href="/ddr_overlays/stream/brackets/1/16/Regulation bracket, double elimination" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Brackets - 16-pilot, double-elimination, MultiGP")}} (1920x2000)</a></p>
-
-		<p><a href="/ddr_overlays/stream/last_heat/32/Regulation bracket, double elimination" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Last Heat - 32-pilot, double-elimination, FAI")}} (1920x800)</a></p>
-
-		<p><a href="/ddr_overlays/stream/last_heat/16/Regulation bracket, double elimination" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Last Heat - 16-pilot, double-elimination, MultiGP")}} (1920x800)</a></p>
-
-		<!--<p><a href="/ddr/stream/overlay_topbar" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Top Bar Native")}} (1920x200)</a></p>
-		<p><a href="/ddr/stream/results_top16/0" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Results (top16) + Avatar</a></p>
-		<p><a href="/ddr/stream/last_heat/0" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Last Heat</a></p>
-
-		<p><a href="/ddr/stream/race_results" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Current Race Result List</a></p>
-		-->
-	</div>
-
-	<div class="text-center mb-5">
-
-		<h3>{{ __("DDR Node Overlays")}} (960x600):</h3>
-		<p><a href="/ddr_overlays/stream/node/1" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 1</a></p>
-		<p><a href="/ddr_overlays/stream/node/2" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 2</a></p>
-		<p><a href="/ddr_overlays/stream/node/3" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 3</a></p>
-		<p><a href="/ddr_overlays/stream/node/4" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 4</a></p>
-		<p><a href="/ddr_overlays/stream/node/5" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 5</a></p>
-		<p><a href="/ddr_overlays/stream/node/6" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 6</a></p>
-		<p><a href="/ddr_overlays/stream/node/7" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 7</a></p>
-		<p><a href="/ddr_overlays/stream/node/8" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 8</a></p>
-
-	</div>
-
-	<style>
-		header {
-			text-align: center;
-			padding: 10px 0;
-			background-color: #00112d;
-		}
-
-		body {
-			font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-			padding: 0;
-			margin: 0;
-			/*background-color: #0f0f0f;
-			color: #efefef;
-			*/
-		}
-
-		a {
-
-		}
-
-		.text-center {
-			text-align: center;
-		}
-
-		hr {
-			border: 0;
-			border-top: 1px solid #ccc;
-			margin: 20px 0;
-			width: 100%;
-		}
-
-		.btn {
-			background-color: #4a34d5;
-			border: 0;
-			color: #fff;
-			padding: 16px 20px;
-			border-radius: 6px;
-		}
-
-		.btn-success {
-			background-color: #2ecc71;
-		}
-
-		.btn-danger {
-			background-color: #e74c3c;
-		}
-
-		.p-2 {
-			padding: 10px;
-		}
-
-		.mb-5 {
-			margin-bottom: 50px;
-		}
-
-		.notification {
-			padding: 10px;
-			border-radius: 6px;
-			;
-			background-color: #ccc;
-		}
-
-		.notification-danger {
-			background-color: #e74c3c;
-			color: #fff;
-		}
-
-		.bottom {
-			position: absolute;
-			bottom: 20px;
-			width: 100%;
-			text-align: center;
-			margin-left: -20px;
-		}
-
-		#popup_bg {
-			position: absolute;
-			width: 100vw;
-			height: 100vh;
-			background-color: rgba(0, 0, 0, 0.6);
-		}
-
-		#result_popup, #scan_popup {
-			position: absolute;
-			background-color: #fff;
-			width: calc(100% - 60px);
-			margin: 10px;
-			padding: 20px;
-			border-radius: 6px;
-			/* height: calc(100vh - 60px); */
-		}
-
-		#result_popup {
-			/* display: none; */
-		}
-
-		#scan_popup {
-			 display: none;
-			 height: calc(100vh - 260px);
-		}
-
-		#popup_bg {
-			display: none;
-		}
-
-		#reader {
-			width: 100%;
-			min-height: calc(60vh - 60px);
-			/* height: calc(60vh - 60px); */
-			background-color: #ccc;
-			border-radius: 6px;
-			overflow: hidden;
-		}
-
-		.fpvscores_data_avatar {
-			width: 86px;
-			height: 86px;
-			float: left;
-		}
-
-		.fpvscores_data_pilot {
-			float: left;
-			padding-left: 20px;
-			padding-top: 20px;
-			width: calc(100% - 128px);
-			height: 86px;
-		}
-
-		.fpvscores_data_avatar img {
-			border-radius: 50%;
-			width: 100%;
-		}
-
-		#fpvscores_data_pilot_name {
-
-		}
-
-		#fpvscores_data_pilot_callsign {
-			font-size: 18px;
-			font-weight: 700;
-		}
-	</style>
-
-
-
 
     <header>
         <img src="/ddr_overlays/static/imgs/ddr_logo_white.png" alt="DDR Logo" height="48px"> 
@@ -276,72 +98,145 @@
 
         <br>
         <p style="max-width: 700px; margin: 0 auto;"><b>Pilot Avatars</b><br>
-            Pilot avatars are obtained from the /server/static/user/avatars/ folder. The file name should be the pilot's callsign in lowercase where spaces has been replaced for underscores (_) and in the .jpg file type. The file should be a square image, preferably 256x256 pixels. If no avatar is found it will show the default avatar.
+            Pilot avatars are obtained from the /server/static/user/avatars/ folder. The file name should be the pilot's callsign in lowercase where spaces have been replaced for underscores (_) and in the .jpg file type. The file should be a square image, preferably 256x256 pixels. If no avatar is found, it will show the default avatar.
         </p>
+
         <br>
         <p style="max-width: 700px; margin: 0 auto;"><b>Country Flags</b><br>
             A country can be set as pilot attribute in the pilots tab (dropdown). When set it shows the flag icon before the pilot's callsign.
             <br>
-            Flags have been downloaded from <a href="https://flagpedia.net/download/images">flagpedia.net</a> (same width 80px, variable height, JPG format).
+            Flags have been downloaded from <a href="https://flagpedia.net/download/images" target="_blank">flagpedia.net</a> (same width 80px, variable height, JPG format).
         </p>
 
         <br>
-
         <p style="max-width: 700px; margin: 0 auto;"><b>Brackets</b><br>
             For now supported brackets are 32 double-elimination (FAI, 4-up, 32-pilot) and 16 double-elimination (MultiGP, 4-up, 16-pilot). Others will follow.
             <br><br>
             The advice is to load the whole page as 1 source in OBS and then make 2 scenes, one for the Winner Bracket and one for the Lower Bracket and crop the source accordingly. This way you can easily switch between the two.
         </p>
-
     </div>
-
-    <!--
-    <div class="text-center mb-5">
-        <h3>{{ __("Functions")}}:</h3>
-        
-        <p><a href="/fpvscores/qr_scanner" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Pilot Check-in")}}</a></p>
-
-    </div>
-    -->
 
     <div class="text-center mb-5">
         <h3>{{ __("Overlays")}}:</h3>
 
-        <p><a href="/ddr_overlays/stream/bar?nologo=1" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Status Bar")}} (1920x200)</a></p>
-        <p><a href="/ddr_overlays/stream/next_up" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Next Up")}} (1920x800)</a></p>
+        <div class="form-container text-center mb-5">
+        <form id="ddr_form">
+            <label for="bracket_type">Bracket type:</label>
+            <select id="bracket_type">
+                <option value="multigp16">MultiGP 16 double-elimination</option>
+                <!-- <option value="fai16">FAI 16 single-elimination</option> -->
+                <!-- <option value="fai16de">FAI 16 double-elimination</option> -->
+                <!-- <option value="fai32">FAI 32 single-elimination</option> -->
+                <option value="fai32de">FAI 32 double-elimination</option>
+                <!-- <option value="fai64">FAI 64 single-elimination</option> -->
+                <!-- <option value="fai64de">FAI 64 double-elimination</option> -->
+            </select>
 
-        <p><a href="/ddr_overlays/stream/leaderboard/0" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Leaderboard Top 32 - Fullscreen")}} (1920x1080)</a></p>
-        <p><a href="/ddr_overlays/stream/leaderboard_pages/0" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Leaderboard Top 32 - Pages")}} (1920x600)</a></p>
+            <br><br>
 
-        <p><a href="/ddr_overlays/stream/brackets/1/32/Regulation bracket, double elimination" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Brackets - 32-pilot, double-elimination, FAI")}} (1920x2000)</a></p>
+            <label for="class_id">Class name:</label>
+            <select id="class_id">
+                <!-- <option value="class.id">class.name</option> -->
+            </select>
 
-        <p><a href="/ddr_overlays/stream/brackets/1/16/Regulation bracket, double elimination" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Brackets - 16-pilot, double-elimination, MultiGP")}} (1920x2000)</a></p>
+            <br>
+        </form>
+        </div>
 
-        <!--<p><a href="/ddr/stream/overlay_topbar" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Top Bar Native")}} (1920x200)</a></p>
-        <p><a href="/ddr/stream/results_top16/0" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Results (top16) + Avatar</a></p>
-        <p><a href="/ddr/stream/last_heat/0" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Last Heat</a></p>
+    <style>
+        .form-container {
+            padding: 20px;
+            margin-left: 35%;
+            margin-right: 35%;
+            border: 2px solid black;
+        }
+        label, input {
+            width: 100%;
+            margin-bottom: 10px;
+        }
 
-        <p><a href="/ddr/stream/race_results" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Current Race Result List</a></p>
-        -->
+        table {
+            width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Link</th>
+                <th>Description</th>
+                <th>Required parameters</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><a href="/ddr_overlays/stream/results" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Live Results")}} (1920x800)</a></td>
+                <td>Panel with real time positions and lap times</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td><a href="/ddr_overlays/stream/bar?nologo=1" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Status Bar")}} (1920x200)</a></td>
+                <td>Status Bar</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/leaderboard")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Qualifier Leaderboard - Fullscreen")}} (1920x1080)</a></td>
+                <td>Current leaderboard on a single page, designed for qualifier results</td>
+                <td>Bracket type<br>Qualifier class</td>
+            </tr>
+            <tr>
+                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/leaderboard_pages")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Qualifier Leaderboard - Pages")}} (1920x600)</a></td>
+                <td>Current leaderboard divided in pages of 8 pilots each, designed for qualifier results</td>
+                <td>Bracket type<br>Qualifier class</td>
+            </tr>
+            <tr>
+                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/brackets")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Brackets")}} (1920x2000)</a></td>
+                <td>Bracket diagram of elimination stage</td>
+                <td>Bracket type<br>Race class</td>
+            </tr>
+            <tr>
+                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/last_heat")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Last Heat")}} (1920x800)</a></td>
+                <td>Results of the last heat of elimination stage</td>
+                <td>Bracket type<br>Race class</td>
+            </tr>
+            <tr>
+                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/next_up")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Next Up")}} (1920x800)</a></td>
+                <td>Preview of the next heat</td>
+                <td>-</td>
+            </tr>
+            <tr>
+                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/podium")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Podium")}} (1920x800)</a></td>
+                <td>Top 3 pilots of the leaderboard</td>
+                <td>Race class</td>
+            </tr>
+        </tbody>
+    </table>
     </div>
-
-
 
     <div class="text-center mb-5">
 
         <h3>{{ __("DDR Node Overlays")}} (960x600):</h3>
-        <p><a href="/ddr_overlays/stream/node/1" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 1</a></p>
-        <p><a href="/ddr_overlays/stream/node/2" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 2</a></p>
-        <p><a href="/ddr_overlays/stream/node/3" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 3</a></p>
-        <p><a href="/ddr_overlays/stream/node/4" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 4</a></p>
-        <p><a href="/ddr_overlays/stream/node/5" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 5</a></p>
-        <p><a href="/ddr_overlays/stream/node/6" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 6</a></p>
-        <p><a href="/ddr_overlays/stream/node/7" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 7</a></p>
-        <p><a href="/ddr_overlays/stream/node/8" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 8</a></p>
+        <p><a href="/ddr_overlays/stream/node/1" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 1</a></p>
+        <p><a href="/ddr_overlays/stream/node/2" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 2</a></p>
+        <p><a href="/ddr_overlays/stream/node/3" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 3</a></p>
+        <p><a href="/ddr_overlays/stream/node/4" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 4</a></p>
+        <p><a href="/ddr_overlays/stream/node/5" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 5</a></p>
+        <p><a href="/ddr_overlays/stream/node/6" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 6</a></p>
+        <p><a href="/ddr_overlays/stream/node/7" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 7</a></p>
+        <p><a href="/ddr_overlays/stream/node/8" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 8</a></p>
 
     </div>
-
-
 
     <style>
         header {
@@ -349,7 +244,7 @@
             padding: 10px 0;
             background-color: #00112d;
         }
-        
+
         body {
             font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
             padding: 0;
@@ -360,9 +255,9 @@
         }
 
         a {
-            
+
         }
-        
+
         .text-center {
             text-align: center;
         }
@@ -408,7 +303,6 @@
         .notification-danger {
             background-color: #e74c3c;
             color: #fff;
-
         }
 
         .bottom {
@@ -458,7 +352,6 @@
             overflow: hidden;
         }
 
-
         .fpvscores_data_avatar {
             width: 86px;
             height: 86px;
@@ -479,15 +372,14 @@
         }
 
         #fpvscores_data_pilot_name {
-       
+
         }
 
-        #fpvscores_data_pilot_callsign{
+        #fpvscores_data_pilot_callsign {
             font-size: 18px;
             font-weight: 700;
         }
     </style>
-
 
 </body>
 

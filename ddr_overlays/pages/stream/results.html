@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="RotorHazard">
     <meta name="google" content="notranslate">
-    <title>Stream Top Bar - {{ getOption("timerName") }}</title>
+    <title>{{ __('Stream') }}: {{ __('Current Race') }}</title>
 
     <!-- Icons -->
     <link rel="apple-touch-icon" sizes="180x180" href="/static/image/apple-touch-icon.png">
@@ -30,10 +30,7 @@
     <script type="text/javascript" src="/static/rotorhazard.js"></script>
 
     <!-- CSS -->
-    <link rel="stylesheet" href="/static/magnific-1.1.0/magnific-popup.css"></link>
-    <link rel="stylesheet" href="/static/stream.css"></link>
-    <link rel="stylesheet" href="/ddr_overlays/static/fonts/teko/stylesheet.css"></link>
-    <link rel="stylesheet" href="/ddr_overlays/static/css/ddr_overlays.css"></link>
+    <link rel="stylesheet" href="/ddr_overlays/static/css/results.css"></link>
 
     <!-- Child template head content -->
 
@@ -48,14 +45,16 @@
     var data_dependencies = [
         'all_languages',
         'language',
+        'result_data',
+        'current_laps',
+        'pilot_data',
         'leaderboard',
         'race_status',
     ];
 
     rotorhazard.show_messages = false;
 
-    // the class of the current heat
-    var streamclass;
+    var ddr_pilot_data;
 
     function race_kickoff(msg) {
         rotorhazard.timer.stopAll();
@@ -64,7 +63,7 @@
         var race_start_pi = (msg.pi_starts_at_s * 1000); // convert seconds (pi) to millis (JS)
 
         rotorhazard.timer.race.hidden_staging = Boolean(msg.hide_stage_timer);
-        rotorhazard.timer.race.count_up = Boolean(msg.race_mode);
+        rotorhazard.timer.race.count_up = Boolean(msg.unlimited_time);
         rotorhazard.timer.race.duration_tenths = msg.race_time_sec * 10;
 
         rotorhazard.timer.race.start(race_start_pi, staging_start_pi);
@@ -75,45 +74,69 @@
         rotorhazard.pi_time_request = window.performance.now();
         socket.emit('get_pi_time');
 
-        socket.emit('load_data', {'load_types': [
-            'current_heat',
-        ]});
-
-        socket.on('current_heat', function (msg) {
-            console.log('Class of the current heat is:', msg.heat_class);
-            if (msg.heat_class) {
-                streamclass = msg.heat_class;
-            }
-        });
+        $('.timing-clock .warning').hide();
 
         socket.on('pi_time', default_handler['pi_time']);
 
         socket.on('language', default_handler['language']);
+
+        // set up node local store
+        //for (i = 0; i < {{ num_nodes }}; i++) {
+        //    rotorhazard.nodes[i] = new nodeModel();
+        //}
 
         socket.on('race_scheduled', default_handler['race_scheduled']);
 
         socket.on('race_status', default_handler['race_status']);
 
         socket.on('heartbeat', default_handler['heartbeat']);
+        
+        var current_laps = {};
+        socket.on('current_laps', function (msg) {
+            if (msg && 'last_race' in msg) {
+                current_laps = msg.last_race;
+            } else {
+                current_laps = msg.current;
+            }
+        });
+
+        socket.on('pilot_data', function (msg) {
+            rotorhazard.event.pilot_attributes = msg.attributes;
+            rotorhazard.event.pilots = msg.pilots;
+            rotorhazard.options.pilotSort = msg.pilotSort;
+            ddr_pilot_data = msg.pilots;    
+        });
 
         socket.on('leaderboard', function (msg) {
             if (msg && 'last_race' in msg) {
-                var race = msg.last_race;
+                race = msg.last_race;
             } else {
-                var race = msg.current;
+                race = msg.current;
             }
 
-            var heatname = __('Heat') + ' ' + race.heat;
-            if (race.displayname) {
-                heatname = race.displayname;
-            }
-
-            $('.curr_heat_Title').html(heatname);
-
+            $('.current_heat').html(race.displayname);
+            
             leaderboard_type = race.leaderboard.meta.primary_leaderboard;
             $('#leaderboard').empty();
-            $('#leaderboard').append(build_leaderboard(race.leaderboard[leaderboard_type], 'current', race.leaderboard.meta));
+            $('#leaderboard').append(build_leaderboard(race.leaderboard[leaderboard_type], 'current', race.leaderboard.meta, ddr_pilot_data.length, ddr_pilot_data));
 
+            var this_leaderboard = race.leaderboard[leaderboard_type];
+            var pilot_to_laps = {};
+            for (var i in this_leaderboard) {
+                var this_callsign = this_leaderboard[i].callsign;
+                pilot_to_laps[this_callsign] = "";
+                for (var j in current_laps.node_index) {
+                    if (current_laps.node_index[j].pilot?.callsign == this_callsign) {
+                        for (var k in current_laps.node_index[j].laps) {
+                            var this_lap = current_laps.node_index[j].laps[k];
+                            pilot_to_laps[this_callsign] += this_lap.lap_time + "<br/>";
+                        }
+                        break;
+                    }
+                }
+                $('#leaderboard td.laps').eq(i).html(pilot_to_laps[this_callsign] ? pilot_to_laps[this_callsign] : "—");
+            }
+            
             $('#team_leaderboard').empty();
             if (race.team_leaderboard && 'meta' in race.team_leaderboard) {
                 leaderboard_type = race.team_leaderboard.meta.primary_leaderboard;
@@ -136,55 +159,31 @@
         socket.on('stage_ready', default_handler['stage_ready']);
 
         socket.on('stop_timer', default_handler['stop_timer']);
-
     });
 
 </script>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        function getUrlParameter(name) {
-            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-            var results = regex.exec(location.search);
-            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-        }
-
-        if (getUrlParameter('nologo') === '1') {
-            var logoElement = document.getElementById('logo');
-            if (logoElement) {
-                logoElement.style.display = 'none';
-            }
-        }
-    });
-</script>
-
-<main id="ddr_frame_topbar_main">
-
-    <div id="ddr_frame_topbar">
-
-        <div id="block_left">
-            <div id="timer">
-                <div class="timing-clock"><div class="time-display">--:--</div></div>
+<main class="page-stream">
+    <div id="header">
+        <h1 class="current_heat">{{ __('Loading...') }}</h1>
+        <div id="timer">
+            <div class="timing-clock">
+                <div class="warning">
+                    <!-- <div class="symbol">&#9888;&#xFE0E; {{ __('Sync') }}</div> -->
+                    <!-- <div class="value">{{ __('Acquiring') }}</div> -->
+                </div>
+                <div class="time-display">--:--</div>
             </div>
-        </div>
-
-        <div id="block_center">
-            <div id="heatTitle" class="current_heat"><span class="curr_heat_Title">{{ __('Loading...') }} </span><span id="class_name"></span> | <span id="event_Title"> {{ getOption('eventName') }}</span></div>
-        </div>
-
-        <div id="block_right">
-
-            <img id="logo" src="/ddr_overlays/static/imgs/ddr_logo_white.png" height="54px" style="float: right; margin-right: 10px; margin-top: 2px;">
-            <!--
-            <div id="firstplace">
-                <img src="/fpvscores/static/assets/imgs/icons/trophy.svg"> <span id="n1PilotTag"></span>
-            </div>
-            -->
         </div>
     </div>
 
-    <!--<div class="race_status_message"></div>-->
+    <!--Display the race leaderboard-->
+    <div id="leaderboard"></div>
+
+    <div id="team_leaderboard"></div>
+
+    <div class="race_status_message"></div>
+</div>
 
 </main>
 

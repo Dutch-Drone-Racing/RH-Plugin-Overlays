@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="RotorHazard">
+    <meta name="google" content="notranslate">
+    <title>Leaderboard Fullscreen</title>
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/image/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/image/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/image/favicon-16x16.png">
+    <link rel="manifest" href="/static/image/site.webmanifest">
+    <link rel="mask-icon" href="/static/image/safari-pinned-tab.svg" color="#ee7a28">
+    <link rel="shortcut icon" href="/static/image/favicon.ico">
+    <meta name="msapplication-TileColor" content="#ee7a28">
+    <meta name="msapplication-config" content="/static/image/browserconfig.xml">
+    <meta name="theme-color" content="#224873">
+
+    <!-- Scripts -->
+    <script type="text/javascript" src="/static/jquery-3.6.4/jquery-3.6.4.min.js"></script>
+    <script type="text/javascript" src="/static/articulate/articulate.min.js"></script>
+    <script type="text/javascript" src="/static/socket.io-4.6.1/socket.io.min.js"></script>
+    <script type="text/javascript" src="/static/smoothie/smoothie.js"></script>
+    <script type="text/javascript" src="/static/magnific-1.1.0/magnific-inline-min.js"></script>
+    <script type="text/javascript" src="/static/svgasset.js"></script>
+    <script type="text/javascript" src="/static/rotorhazard.js"></script>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="/static/magnific-1.1.0/magnific-popup.css"></link>
+    <link rel="stylesheet" href="/static/stream.css"></link>
+    <link rel="stylesheet" href="/ddr_overlays/static/fonts/teko/stylesheet.css"></link>
+    <link rel="stylesheet" href="/ddr_overlays/static/css/ddr_overlays.css"></link>
+
+    <!-- Child template head content -->
+
+</head>
+
+<body>
+
+    <link rel="stylesheet" href="/static/stream.css"></link>
+
+    <script type="text/javascript" charset="utf-8" src="/ddr_overlays/static/js/ddr_overlays.js"></script>
+
+    <script type="text/javascript" charset="utf-8">
+
+        var data_dependencies = [
+            'all_languages',
+            'language',
+            'result_data',
+            'pilot_data'
+        ];
+
+        rotorhazard.show_messages = false;
+        var result_data;
+        var streamclass = '{{ class_id }}';
+
+        $(document).ready(function () {
+            if (!{{ class_id }}) {
+                socket.emit('load_data', {'load_types': [
+                    'current_heat',
+                ]});
+            }
+
+            socket.on('language', default_handler['language']);
+
+            socket.on('current_heat', function (msg) {
+                if (!{{ class_id }}) {
+                    if (msg.heat_class) {
+                        streamclass = msg.heat_class;
+                        if (result_data != undefined) {
+                            display_result_data(result_data);
+                        }
+                    } else {
+                        display_nothing()
+                    }
+                }
+            });
+
+            socket.on('pilot_data', function (msg) {
+                rotorhazard.event.pilot_attributes = msg.attributes;
+                rotorhazard.event.pilots = msg.pilots;
+                rotorhazard.options.pilotSort = msg.pilotSort;
+            });
+
+            function display_nothing() {
+                $('#header h1').html(__('No Data'))
+                $('#leaderboard').html('<p>' + __('There is no saved race data available to view.') + '</p>');
+            }
+
+            function display_result_data(msg) {
+                if (!$.isEmptyObject(msg.heats)) {
+                    for (var class_id in msg.heats_by_class) {
+                        if (class_id == streamclass) {
+                            var current_class = msg.classes[class_id];
+                            if (current_class) {
+                                if (current_class.name) {
+                                    class_name = current_class.name;
+                                } else {
+                                    class_name = __('Class') + ' ' + current_class.id;
+                                }
+                                $('#header h1').html(class_name)
+
+                                var leaderboard;
+                                /* filtro la leaderboard ai primi 16 o 32 piloti per le qualifiche, non funziona ancora con 64 piloti ma non importa */
+                                if (current_class.ranking) {
+                                    // ranking other than "From Race Format"
+                                    leaderboard = build_leaderboard(current_class.ranking.ranking,
+                                                                    'by_race_time',
+                                                                    undefined,
+                                                                    get_number_of_pilots_from_format( '{{ bracket_type }}' ) /* [16|32|64] */ );
+                                } else if (current_class.leaderboard && current_class.leaderboard[current_class.leaderboard.meta.primary_leaderboard].length) {
+                                    // ranking equal to "From Race Format"
+                                    leaderboard = build_leaderboard(current_class.leaderboard[current_class.leaderboard.meta.primary_leaderboard],
+                                                                    current_class.leaderboard.meta.primary_leaderboard,
+                                                                    msg.meta,
+                                                                    get_number_of_pilots_from_format( '{{ bracket_type }}' ) /* [16|32|64] */ );
+                                }
+
+                                if (leaderboard) {
+                                    // Elimina tutte le righe dopo la 32-esima
+                                    leaderboard.find('tbody tr').filter(':nth-child(n+33)').remove();
+
+                                    // Calcola il numero di pagine in base al numero di righe
+                                    var rows = leaderboard.find('tbody tr');
+                                    var numRows = rows.length;
+                                    var numPages = Math.ceil(numRows / 8);
+
+                                    // Mostra la quantità corretta di pagine rimuovendo le righe
+                                    for (var i = 1; i <= numPages; i++) {
+                                        var pageId = '#leaderboard_fai_p' + i;
+                                        var start = (i - 1) * 8 + 1;
+                                        var end = start + 7;
+
+                                        // Clona la classifica per la nuova pagina
+                                        var pageLeaderboard = leaderboard.clone();
+
+                                        // Elimina le righe che non appartengono a questo segmento
+                                        pageLeaderboard.find('tbody tr').filter(function(index) {
+                                            return (index < start - 1 || index > end - 1);
+                                        }).remove();
+
+                                        // Aggiungi la classifica clonata e filtrata al div appropriato
+                                        $(pageId).html(pageLeaderboard);
+                                    }
+
+                                    // Elimina i div non utilizzati se ci sono meno di 4 pagine
+                                    for (var j = numPages + 1; j <= 4; j++) {
+                                        $('#leaderboard_fai_p' + j).remove();
+                                    }
+
+                                    // When pilots are <= 16, show them on two columns instead of four
+                                    if (numPages <= 2) {
+                                        $('.leaderboard_fai_page').width('calc(50% - 20px)');
+                                    }
+
+                                    render_pilots(rotorhazard);
+                                } else {
+                                    display_nothing()
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    display_nothing()
+                }
+            }
+
+            socket.on('result_data', function (msg) {
+                result_data = msg;
+                display_result_data(result_data);
+            });
+        });
+
+    </script>
+
+    <main class="page-streamclass leaderboard_fs" id="ddr_leaderboard32">
+
+        <!--Display the race leaderboard-->
+
+        <div id="leaderboard_fai_p1" class="leaderboard_fai_page" >
+
+        </div>
+
+        <div id="leaderboard_fai_p2" class="leaderboard_fai_page" >
+
+        </div>
+
+        <div id="leaderboard_fai_p3" class="leaderboard_fai_page" >
+
+        </div>
+
+        <div id="leaderboard_fai_p4" class="leaderboard_fai_page" >
+
+        </div>
+
+    </main>
+
+    <div id="pilotlist">
+
+    </div>
+
+</body>
+
+</html>

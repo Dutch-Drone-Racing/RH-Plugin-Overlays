@@ -7,14 +7,14 @@ Stream overlays for RotorHazard as a plugin. You can use these in OBS or any oth
 
 ## Overlays
 - Single Pilot Node
+- Live Results
 - Race Status Bar
+- Qualifier Leaderboard
+- Qualifier Leaderboard / 4 pages
+- Brackets
+- 'Last Heat' display
 - 'Next Up' display
-- Leaderboard - Top 32 Pilots
-- Leaderboard - Top 32 Pilots / 4 pages
-- Brackets 32 Double-Elimination FAI
-- Brackets 16 Double-Elimination MultiGP
-- 'Last Heat' display (32 Double-Elimination FAI)
-- 'Last Heat' display (16 Double-Elimination MultiGP)
+- Podium
 
 ## Installation
 Download the latest release and put the **ddr_overlays** folder in the **plugins** folder of your RotorHazard installation. (Re-)Start your RotorHazard server.
@@ -26,10 +26,12 @@ To setup country flags and pilot avatars refer to the **Important Information** 
 ## Important Information
 
 ### Pilot Avatars
-Pilot avatars are obtained from the `/server/static/user/avatars/`  folder. The file name should be the pilot's callsign in lowercase where spaces has been replaced for underscores (_) and in the .jpg file type. The file should be a square image, preferably 256x256 or 512x612 pixels. If no avatar is found it will show the default avatar.
+Pilot avatars are obtained from the `/server/static/user/avatars/` folder. The file name should be the pilot's callsign in lowercase where spaces has been replaced for underscores (_) and in the .jpg file type. The file should be a square image, preferably 256x256 or 512x612 pixels. If no avatar is found it will show the default avatar.
 
 ### Country Flags
 A country can be set as pilot attribute in the pilots tab (dropdown). When set it shows the flag icon before the pilot's callsign.
+
+Flags have been downloaded from [flagpedia.net](https://flagpedia.net/download/images) (same width 80px, variable height, JPG format).
 
 ### Brackets
 For now supported brackets are 32 double-elimination (FAI, 4-up, 32-pilot) and 16 double-elimination (MultiGP, 4-up, 16-pilot). Others will follow.
