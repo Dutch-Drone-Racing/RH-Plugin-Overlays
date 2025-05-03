@@ -389,9 +389,9 @@ function build_leaderboard(leaderboard, display_type, meta, number_of_pilots=999
 
 /* Pilot data retrieval */
 function getFlagURL(pilot_id, ddr_pilot_data) {
-    let flagImg = '/ddr_overlays/static/imgs/flags/' + getPilotFlag(pilot_id, ddr_pilot_data) + '.png';
+    let flagImg = '/ddr_overlays/static/imgs/flags/' + getPilotFlag(pilot_id, ddr_pilot_data) + '.jpg';
     if (!imageExists(flagImg)) {
-        flagImg = '/ddr_overlays/static/imgs/flags/it.png';
+        flagImg = '/ddr_overlays/static/imgs/flags/it.jpg';
     }
     return flagImg;
 }
@@ -413,7 +413,7 @@ function getPilotFlag(pilot_id, ddr_pilot_data) {
 }
 
 function getPilotImgURL(pilot) {
-    let pilotImg = '/static/user/avatars/' + pilot.callsign.replace(/ /g,"_").toLowerCase() + '.jpg';      
+    let pilotImg = '/static/user/avatars/' + pilot.callsign.replace(/ /g,"_").toLowerCase() + '.jpg';
     if (!imageExists(pilotImg)) {
         pilotImg = '/ddr_overlays/static/imgs/no_avatar.png';
     }
