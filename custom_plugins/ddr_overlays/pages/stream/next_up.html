@@ -49,13 +49,19 @@
         'all_languages',
         'language',
         'pilot_data',
+        'result_data',
+        'heat_data',
+        'class_data',
         'leaderboard',
-        'race_status'
+        'race_status',
     ];
 
     rotorhazard.show_messages = false;
 
     var ddr_pilot_data;
+    var ddr_race_data;
+    var ddr_heat_data;
+    var ddr_class_data;
 
     function race_kickoff(msg) {
         rotorhazard.timer.stopAll();
@@ -91,6 +97,18 @@
             ddr_pilot_data = msg.pilots;    
         });
 
+        socket.on('result_data', function (msg) {
+            ddr_race_data = msg;
+        });
+
+        socket.on('heat_data', function (msg) {
+            ddr_heat_data = msg;
+        });
+
+        socket.on('class_data', function (msg) {
+            ddr_class_data = msg.classes;
+        });
+
         socket.on('heartbeat', default_handler['heartbeat']);
 
         socket.on('leaderboard', function (msg) {
@@ -121,7 +139,7 @@
         </div>
 
         <div id="title">
-            <span class="curr_heat_title"></span> - 
+            <span class="curr_heat_title"></span>
             <span class="curr_event_name">{{ getOption('eventName') }}</span>
         </div>
 
@@ -131,13 +149,13 @@
 
                 <div class="nextup_pilot_avatar">
                     <div class="nextup_pilot_avatar_mask">
-                        <img src="/ddr/static/imgs/no-avatar.webp" alt="Avatar">
+                        <img src="/ddr_overlays/static/imgs/no_avatar.png" alt="Avatar">
                     </div>
                 </div>
 
                 <div class="nextup_pilot_flag">
                     <div class="nextup_pilot_flag_mask">
-                        <img src="/ddr/static/imgs/flags/nl.jpg">
+                        <img src="/ddr_overlays/static/imgs/flags/nl.jpg">
                     </div>
                 </div>
 

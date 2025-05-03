@@ -202,8 +202,7 @@
                         pilot = rotorhazard.event.pilots[pilot];
 
                         if (pilot.country) {
-                            country_upper = pilot.country;
-                            country_flag = '<img class="country_flag" src="/ddr_overlays/static/imgs/flags/' + country_upper + '.jpg">';
+                            country_flag = '<img class="country_flag" src="' + getFlagURL(pilot_id, msg.pilots) + '">';
                             $('#node_flag').html(country_flag);
                         }
 
@@ -258,11 +257,7 @@
                         // $('#laps').html(pilot_data.laps);
                         // $('#fastest_lap').html(pilot_data.fastest_lap);
 
-                        var pilotImg = '/static/user/avatars/' + pilot_data.callsign.replace(/ /g,"_").toLowerCase() + '.jpg';
-
-                        if (!imageExists(pilotImg)) {
-                            pilotImg = '/ddr_overlays/static/imgs/no_avatar.png';
-                        }
+                        var pilotImg = getPilotImgURL(pilot_data);
 
                         if (pilotNodeImg !== pilotImg && pilotImg !== '/ddr_overlays/static/imgs/no_avatar.png') {
                             pilotNodeImg = pilotImg;

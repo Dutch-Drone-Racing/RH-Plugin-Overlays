@@ -88,7 +88,7 @@
             rotorhazard.event.pilots = msg.pilots;
             rotorhazard.options.pilotSort = msg.pilotSort;
             ddr_pilot_data = msg.pilots;    
-        }); 
+        });
 
         socket.on('class_data', function (msg) {
             ddr_class_data = msg.classes;

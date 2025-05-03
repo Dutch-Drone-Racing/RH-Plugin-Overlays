@@ -39,7 +39,7 @@ def initialize(rhapi):
     def ddr_overlays_homePage():
         return templating.render_template('ddr_overlay_index.html', serverInfo=None, getOption=rhapi.db.option, __=rhapi.__)
 
-    ### bar ###
+    ### live results ###
     @bp.route('/ddr_overlays/stream/results')
     def ddr_overlays_streamResults():
         return templating.render_template('stream/results.html', serverInfo=None, getOption=rhapi.db.option, __=rhapi.__, DEBUG=False)
