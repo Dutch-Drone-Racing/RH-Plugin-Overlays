@@ -533,7 +533,7 @@ const bracket_formats = {
     //"fai64de":   []
 }
 
-function build_elimination_brackets(race_bracket_type, race_class_id, ddr_pilot_data, ddr_heat_data, ddr_class_data) {
+function build_elimination_brackets(race_bracket_type, race_class_id, ddr_pilot_data, ddr_heat_data, ddr_class_data, ddr_race_data) {
 
     // clear brackets
     $('#winner_bracket_content').html('');
@@ -560,16 +560,21 @@ function build_elimination_brackets(race_bracket_type, race_class_id, ddr_pilot_
 
         for (let j = 0; j < filtered_slots.length; j++) {
             const slot = filtered_slots[j];
-            const pilot = ddr_pilot_data.find(p => p.pilot_id === slot.pilot_id);           
+            let pilot;
 
             if (slot.pilot_id === 0) {
-                if (slot.method > -1 && !(slot.method == 0 && !slot.pilot_id)) {
-                    var method_text = get_method_descriptor(ddr_pilot_data, ddr_heat_data, ddr_class_data, slot.method, slot.seed_id, slot.seed_rank, slot.pilot_id)
-                    html += '<div class="bracket_race_pilot">';
-                    html += '<div class="no_pilot">' + method_text + '</div>';
-                    html += '</div>';
+                // try to get the pilot from completed heats
+                if (slot.method == 1) {
+                    // heat
+                    const leaderboard_type = ddr_race_data.heats[slot.seed_id]?.leaderboard.meta.primary_leaderboard;
+                    pilot = ddr_race_data.heats[slot.seed_id]?.leaderboard[leaderboard_type].find(p => p.position === slot.seed_rank);
                 }
             } else {
+                // pilot available
+                pilot = ddr_pilot_data.find(p => p.pilot_id === slot.pilot_id);
+            }
+
+            if (pilot) {
                 let flagImg = getFlagURL(pilot.pilot_id, ddr_pilot_data);
                 let pilotImg = getPilotImgURL(pilot);
 
@@ -579,6 +584,11 @@ function build_elimination_brackets(race_bracket_type, race_class_id, ddr_pilot_
                 html += '<div class="flag"><img src="' + flagImg + '" alt="USA"></div>';
                 html += '<div class="pilot_name">' + pilot.callsign + '</div>';
 
+                html += '</div>';
+            } else {
+                let method_text = get_method_descriptor(ddr_pilot_data, ddr_heat_data, ddr_class_data, slot.method, slot.seed_id, slot.seed_rank, slot.pilot_id)
+                html += '<div class="bracket_race_pilot">';
+                html += '<div class="no_pilot">' + method_text + '</div>';
                 html += '</div>';
             }
         }
