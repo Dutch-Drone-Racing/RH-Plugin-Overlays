@@ -200,11 +200,8 @@
                     if (rotorhazard.event.pilots[pilot].pilot_id == pilot_id) {
 
                         pilot = rotorhazard.event.pilots[pilot];
-
-                        if (pilot.country) {
-                            country_flag = '<img class="country_flag" src="' + getFlagURL(pilot_id, msg.pilots) + '">';
-                            $('#node_flag').html(country_flag);
-                        }
+                        country_flag = '<img class="country_flag" src="' + getFlagURL(pilot_id, msg.pilots) + '">';
+                        $('#node_flag').html(country_flag);
 
                         break;
                     }
@@ -259,7 +256,7 @@
 
                         var pilotImg = getPilotImgURL(pilot_data);
 
-                        if (pilotNodeImg !== pilotImg && pilotImg !== '/ddr_overlays/static/imgs/no_avatar.png') {
+                        if (pilotNodeImg !== pilotImg) {
                             pilotNodeImg = pilotImg;
                             document.getElementById('node_avatar_img').src = pilotImg;
                         }
