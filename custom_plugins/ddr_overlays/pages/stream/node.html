@@ -185,9 +185,6 @@
             }
 
             var pilotNodeImg = '';
-
-            var pilot_attributes;
-            var curr_pilot_flag;
             var country_flag;
 
             /* Pilots */
@@ -200,12 +197,8 @@
                     if (rotorhazard.event.pilots[pilot].pilot_id == pilot_id) {
 
                         pilot = rotorhazard.event.pilots[pilot];
-
-                        if (pilot.country) {
-                            country_upper = pilot.country;
-                            country_flag = '<img class="country_flag" src="/ddr_overlays/static/imgs/flags/' + country_upper + '.jpg">';
-                            $('#node_flag').html(country_flag);
-                        }
+                        country_flag = '<img class="country_flag" src="' + getFlagURL(pilot_id, msg.pilots) + '">';
+                        $('#node_flag').html(country_flag);
 
                         break;
                     }
@@ -258,13 +251,9 @@
                         // $('#laps').html(pilot_data.laps);
                         // $('#fastest_lap').html(pilot_data.fastest_lap);
 
-                        var pilotImg = '/static/user/avatars/' + pilot_data.callsign.replace(/ /g,"_").toLowerCase() + '.jpg';
+                        var pilotImg = getPilotImgURL(pilot_data);
 
-                        if (!imageExists(pilotImg)) {
-                            pilotImg = '/ddr_overlays/static/imgs/no_avatar.png';
-                        }
-
-                        if (pilotNodeImg !== pilotImg && pilotImg !== '/ddr_overlays/static/imgs/no_avatar.png') {
+                        if (pilotNodeImg !== pilotImg) {
                             pilotNodeImg = pilotImg;
                             document.getElementById('node_avatar_img').src = pilotImg;
                         }

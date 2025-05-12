@@ -50,6 +50,7 @@
     var data_dependencies = [
         'all_languages',
         'language',
+        'result_data',
         'pilot_data',
         'class_data',
         'heat_data',
@@ -57,6 +58,7 @@
 
     rotorhazard.show_messages = false;
 
+    var ddr_race_data;
     var ddr_pilot_data;
     var ddr_class_data;
     var ddr_heat_data;
@@ -83,12 +85,17 @@
 
         socket.on('race_scheduled', default_handler['race_scheduled']);
 
+        socket.on('result_data', function (msg) {
+            ddr_race_data = msg;
+            build_elimination_brackets('{{ bracket_type }}', '{{ class_id }}', ddr_pilot_data, ddr_heat_data, ddr_class_data, ddr_race_data);
+        });
+
         socket.on('pilot_data', function (msg) {
             rotorhazard.event.pilot_attributes = msg.attributes;
             rotorhazard.event.pilots = msg.pilots;
             rotorhazard.options.pilotSort = msg.pilotSort;
             ddr_pilot_data = msg.pilots;    
-        }); 
+        });
 
         socket.on('class_data', function (msg) {
             ddr_class_data = msg.classes;
@@ -96,7 +103,6 @@
 
         socket.on('heat_data', function (msg) {
             ddr_heat_data = msg.heats;
-            build_elimination_brackets('{{ bracket_type }}', '{{ class_id }}', ddr_pilot_data, ddr_heat_data, ddr_class_data);
         });
 
         socket.on('heartbeat', default_handler['heartbeat']);

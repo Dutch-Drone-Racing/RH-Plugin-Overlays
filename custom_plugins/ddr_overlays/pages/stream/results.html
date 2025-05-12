@@ -80,11 +80,6 @@
 
         socket.on('language', default_handler['language']);
 
-        // set up node local store
-        //for (i = 0; i < {{ num_nodes }}; i++) {
-        //    rotorhazard.nodes[i] = new nodeModel();
-        //}
-
         socket.on('race_scheduled', default_handler['race_scheduled']);
 
         socket.on('race_status', default_handler['race_status']);
@@ -129,12 +124,18 @@
                     if (current_laps.node_index[j].pilot?.callsign == this_callsign) {
                         for (var k in current_laps.node_index[j].laps) {
                             var this_lap = current_laps.node_index[j].laps[k];
-                            pilot_to_laps[this_callsign] += this_lap.lap_time + "<br/>";
+                            if (k == 0) {
+                                // hole shot
+                                pilot_to_laps[this_callsign] += "[" + this_lap.lap_time + "]<br/>";
+                            } else {
+                                // regular lap
+                                pilot_to_laps[this_callsign] += this_lap.lap_time + "<br/>";
+                            }
                         }
                         break;
                     }
                 }
-                $('#leaderboard td.laps').eq(i).html(pilot_to_laps[this_callsign] ? pilot_to_laps[this_callsign] : "—");
+                $('#leaderboard td.laps').eq(i).html(pilot_to_laps[this_callsign] || "—");
             }
             
             $('#team_leaderboard').empty();

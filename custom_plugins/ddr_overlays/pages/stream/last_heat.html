@@ -51,9 +51,9 @@
         'pilot_data',
         'result_data',
         'heat_data',
-        'leaderboard',
         'class_data',
-        'race_status'
+        'leaderboard',
+        'race_status',
     ];
 
     rotorhazard.show_messages = false;
@@ -104,13 +104,6 @@
 
         socket.on('class_data', function (msg) {
             ddr_class_data = msg.classes;
-
-            Object.values(ddr_class_data).forEach(race_class => {
-                if (race_class.id == race_class_id) {
-                    console.log(race_class);
-                    race_class_name = race_class.name;
-                }
-            });
         });
 
         socket.on('race_status', default_handler['race_status']);
@@ -126,67 +119,76 @@
 
             var heat_number = 0;
             if (ddr_race_data != undefined) {
-                // reason for this: race.heat counts heats of every class
-                // we need the heat number inside the current class
-                var elimination_heats = ddr_race_data.heats_by_class[race_class_id];
-                for (let i = 0; i < elimination_heats.length; i++) {
-                    const this_heat = elimination_heats[i];
-                    if (elimination_heats[i] == race.heat) {
-                        heat_number = i+1;
+                // reason for this: race.heat counts heats of every class (as a global counter),
+                // we need the heat number with respect to its class
+                for (let class_id in ddr_race_data.heats_by_class) {
+                    heat_number = ddr_race_data.heats_by_class[class_id].indexOf(race.heat) + 1;
+                    if (heat_number != 0) {
+                        // class found, save data
+                        race_class_id = class_id;
+                        Object.values(ddr_class_data).forEach(race_class => {
+                            if (race_class.id == race_class_id) {
+                                race_class_name = race_class.name;
+                            }
+                        });
+                        break;
                     }
                 }
             } else if (ddr_heat_data != undefined) {
                 // alternative method if ddr_race_data is not available
-                for (let i = 0; i < ddr_heat_data.heats.length; i++) {
-                    const this_heat = ddr_heat_data.heats[i];
-                    if (this_heat.class_id == race_class_id) {
-                        ++heat_number;
-                        if (this_heat.id == race.heat) {
-                            break;
+                let current_heat = ddr_heat_data.heats.find(h => h.id == race.heat);
+                let heats_by_current_class = ddr_heat_data.heats
+                    .filter(h => h.class_id == current_heat.class_id)
+                    .map(h => h.id);
+                heat_number = heats_by_current_class.indexOf(race.heat) + 1;
+                if (heat_number != 0) {
+                    // class found, save data
+                    race_class_id = current_heat.class_id;
+                    Object.values(ddr_class_data).forEach(race_class => {
+                        if (race_class.id == race_class_id) {
+                            race_class_name = race_class.name;
                         }
-                    }
+                    });
                 }
             }
 
             if (heat_number != 0) {
-                // refresh only when the heat is finished
-                // corner case (quite useless but just for fun): if a heat has only one pilot, it doesn't generate the "Winner is <pilot>" status message at the end,
-                // hence the overlay is not updated :D
-                if (race.status_msg) {
-                    let heat_index = heat_number-1;
+                console.log("Found class id " + race_class_id + " (" + race_class_name + ")");
+                console.log("Found heat number " + heat_number);
 
-                    $('.curr_heat_title').html(race.displayname);
+                let heat_index = heat_number-1;
 
-                    $('#nextup_pilot_box').empty();
+                $('.curr_heat_title').html(race.displayname);
 
-                    var leaderboard_type = race.leaderboard.meta.primary_leaderboard;
-                    build_nextup(race.leaderboard[leaderboard_type], 'current', race.leaderboard.meta, ddr_pilot_data, true);
+                $('#nextup_pilot_box').empty();
 
-                    var bracket_format_info = bracket_formats[race_bracket_type];
+                var leaderboard_type = race.leaderboard.meta.primary_leaderboard;
+                build_nextup(race.leaderboard[leaderboard_type], 'current', race.leaderboard.meta, ddr_pilot_data, true);
 
-                    let is_winner_bracket = (bracket_format_info[heat_index].type == "winner");
-                    let is_final_heat = (heat_number >= bracket_format_info[bracket_format_info.length-1].number);
+                var bracket_format_info = bracket_formats[race_bracket_type];
 
-                    // the result is nicely placed for heats with four pilots
-                    if (is_final_heat) {
-                        $('#winner-cell').empty();
-                        $('#lower-cell').empty();
+                let is_winner_bracket = (bracket_format_info[heat_index].type == "winner") || (bracket_format_info[heat_index].type == "preliminary");
+                let is_final_heat = (heat_number >= bracket_format_info[bracket_format_info.length-1].number);
+
+                // the result is nicely placed for heats with four pilots
+                if (is_final_heat) {
+                    $('#winner-cell').empty();
+                    $('#lower-cell').empty();
+                } else {
+                    // left side
+                    if (bracket_format_info[heat_index].advance_to != undefined) {
+                        $('#winner-cell').text("Advance to Race " + bracket_format_info[heat_index].advance_to);
+                    } else if (is_winner_bracket) {
+                        $('#winner-cell').text("Advance to Winner Bracket");
                     } else {
-                        // left side
-                        if (bracket_format_info[heat_index].advance_to != undefined) {
-                            $('#winner-cell').text("Advance to Race " + bracket_format_info[heat_index].advance_to);
-                        } else if (is_winner_bracket) {
-                            $('#winner-cell').text("Advance to Winner Bracket");
-                        } else {
-                            $('#winner-cell').text("Advance to Lower Bracket");
-                        }
+                        $('#winner-cell').text("Advance to Lower Bracket");
+                    }
 
-                        // right side
-                        if (is_winner_bracket) {
-                            $('#lower-cell').text("Go to Lower Bracket");
-                        } else {
-                            $('#lower-cell').text("Eliminated");
-                        }
+                    // right side
+                    if (is_winner_bracket) {
+                        $('#lower-cell').text("Go to Lower Bracket");
+                    } else {
+                        $('#lower-cell').text("Eliminated");
                     }
                 }
             }
@@ -199,7 +201,7 @@
         socket.on('stop_timer', default_handler['stop_timer']);
     });
 
-    let race_class_id = '{{ class_id }}';
+    let race_class_id; // do not use '{ class id }' from URL, it is computed automatically
     let race_class_name;
     let race_bracket_type = '{{ bracket_type }}';
 
@@ -214,7 +216,7 @@
         </div>
 
         <div id="title">
-            <span class="curr_heat_title"></span> - 
+            <span class="curr_heat_title"></span>
             <span class="curr_event_name">{{ getOption('eventName') }}</span>
         </div>
 
@@ -235,13 +237,13 @@
 
                 <div class="nextup_pilot_avatar">
                     <div class="nextup_pilot_avatar_mask">
-                        <img src="/ddr/static/imgs/no-avatar.webp" alt="Avatar">
+                        <img src="/ddr_overlays/static/imgs/no_avatar.png" alt="Avatar">
                     </div>
                 </div>
 
                 <div class="nextup_pilot_flag">
                     <div class="nextup_pilot_flag_mask">
-                        <img src="/ddr/static/imgs/flags/nl.jpg">
+                        <img src="/ddr_overlays/static/imgs/flags/nl.jpg">
                     </div>
                 </div>
 
