@@ -7,7 +7,7 @@
     "info_uri": "https://github.com/Dutch-Drone-Racing/RH-Plugin-StreamOverlays/",
     "license": "DDR",
     "license_uri": "https://github.com/RotorHazard/RotorHazard/blob/main/LICENSE",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "required_rhapi_version": "1.2",
     "category": ["Streaming & Overlays"]
 }
