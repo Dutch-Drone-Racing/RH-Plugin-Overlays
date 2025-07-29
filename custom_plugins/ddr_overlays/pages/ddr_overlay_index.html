@@ -91,14 +91,14 @@
     <hr>
 
     <div class="text-center mb-5">
-        <h3>{{ __("Important Information")}}:</h3>
+        <h3>Important Information:</h3>
         <p style="max-width: 700px; margin: 0 auto;">
             The resolutions displayed are a suggestion based on readability and our setup. You can try different resolutions and see what fits best for your stream.
         </p>
 
         <br>
         <p style="max-width: 700px; margin: 0 auto;"><b>Pilot Avatars</b><br>
-            Pilot avatars are obtained from the /server/static/user/avatars/ folder. The file name should be the pilot's callsign in lowercase where spaces have been replaced for underscores (_) and in the .jpg file type. The file should be a square image, preferably 256x256 pixels. If no avatar is found, it will show the default avatar.
+            Pilot avatars are obtained from the /rh-data/shared/avatars/ folder. The file name should be the pilot's callsign in lowercase where spaces have been replaced for underscores (_) and in the .jpg file type. The file should be a square image, preferably 256x256 pixels. If no avatar is found, it will show the default avatar.
         </p>
 
         <br>
@@ -110,14 +110,14 @@
 
         <br>
         <p style="max-width: 700px; margin: 0 auto;"><b>Brackets</b><br>
-            For now supported brackets are 32 double-elimination (FAI, 4-up, 32-pilot) and 16 double-elimination (MultiGP, 4-up, 16-pilot). Others will follow.
+            Supported brackets are listed in the option box below and more will follow.
             <br><br>
             The advice is to load the whole page as 1 source in OBS and then make 2 scenes, one for the Winner Bracket and one for the Lower Bracket and crop the source accordingly. This way you can easily switch between the two.
         </p>
     </div>
 
     <div class="text-center mb-5">
-        <h3>{{ __("Overlays")}}:</h3>
+        <h3>Overlays:</h3>
 
         <div class="form-container text-center mb-5">
         <form id="ddr_form">
@@ -125,11 +125,12 @@
             <select id="bracket_type">
                 <option value="multigp16">MultiGP 16 double-elimination</option>
                 <!-- <option value="fai16">FAI 16 single-elimination</option> -->
-                <!-- <option value="fai16de">FAI 16 double-elimination</option> -->
+                <option value="fai16de">FAI 16 double-elimination</option>
                 <!-- <option value="fai32">FAI 32 single-elimination</option> -->
                 <option value="fai32de">FAI 32 double-elimination</option>
                 <!-- <option value="fai64">FAI 64 single-elimination</option> -->
                 <!-- <option value="fai64de">FAI 64 double-elimination</option> -->
+                <option value="ddr8de">DDR 8 double-elimination</option>
             </select>
 
             <br><br>
@@ -181,42 +182,42 @@
         </thead>
         <tbody>
             <tr>
-                <td><a href="/ddr_overlays/stream/results" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Live Results")}} (1920x800)</a></td>
+                <td><a href="/ddr_overlays/stream/results" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Live Results (1920x800)</a></td>
                 <td>Panel with real time positions and lap times</td>
                 <td>-</td>
             </tr>
             <tr>
-                <td><a href="/ddr_overlays/stream/bar?nologo=1" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Status Bar")}} (1920x200)</a></td>
+                <td><a href="/ddr_overlays/stream/bar?nologo=1" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Status Bar (1920x200)</a></td>
                 <td>Status Bar</td>
                 <td>-</td>
             </tr>
             <tr>
-                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/leaderboard")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Qualifier Leaderboard - Fullscreen")}} (1920x1080)</a></td>
+                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/leaderboard")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Qualifier Leaderboard - Fullscreen (1920x1080)</a></td>
                 <td>Current leaderboard on a single page, designed for qualifier results</td>
                 <td>Bracket type<br>Qualifier class</td>
             </tr>
             <tr>
-                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/leaderboard_pages")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Qualifier Leaderboard - Pages")}} (1920x600)</a></td>
+                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/leaderboard_pages")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Qualifier Leaderboard - Pages (1920x600)</a></td>
                 <td>Current leaderboard divided in pages of 8 pilots each, designed for qualifier results</td>
                 <td>Bracket type<br>Qualifier class</td>
             </tr>
             <tr>
-                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/brackets")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Brackets")}} (1920x2000)</a></td>
+                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/brackets")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Brackets (1920x2000)</a></td>
                 <td>Bracket diagram of elimination stage</td>
                 <td>Bracket type<br>Race class</td>
             </tr>
             <tr>
-                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/last_heat")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Last Heat")}} (1920x800)</a></td>
+                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/last_heat")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Last Heat (1920x800)</a></td>
                 <td>Results of the last heat of elimination stage</td>
                 <td>Bracket type</td>
             </tr>
             <tr>
-                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/next_up")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Next Up")}} (1920x800)</a></td>
+                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/next_up")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Next Up (1920x800)</a></td>
                 <td>Preview of the next heat</td>
                 <td>-</td>
             </tr>
             <tr>
-                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/podium")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">{{ __("Podium")}} (1920x800)</a></td>
+                <td><a href="#" onclick='openDynamicLink(event, "/ddr_overlays/stream/podium")' class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Podium (1920x800)</a></td>
                 <td>Top 3 pilots of the leaderboard</td>
                 <td>Race class</td>
             </tr>
@@ -226,7 +227,7 @@
 
     <div class="text-center mb-5">
 
-        <h3>{{ __("DDR Node Overlays")}} (960x600):</h3>
+        <h3>DDR Node Overlays (960x600):</h3>
         <p><a href="/ddr_overlays/stream/node/1" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 1</a></p>
         <p><a href="/ddr_overlays/stream/node/2" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 2</a></p>
         <p><a href="/ddr_overlays/stream/node/3" target="_blank" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">Pilot Live + Avatar - Node 3</a></p>

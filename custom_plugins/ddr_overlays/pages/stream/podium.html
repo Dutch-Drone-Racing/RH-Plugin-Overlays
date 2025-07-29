@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="RotorHazard">
     <meta name="google" content="notranslate">
-    <title>Podium</title>
+    <title>Final Ranking</title>
 
     <!-- Icons -->
     <link rel="apple-touch-icon" sizes="180x180" href="/static/image/apple-touch-icon.png">
@@ -35,176 +35,463 @@
     <link rel="stylesheet" href="/ddr_overlays/static/fonts/teko/stylesheet.css"></link>
     <link rel="stylesheet" href="/ddr_overlays/static/css/ddr_overlays.css"></link>
 
-    <!-- Child template head content -->
-
-</head>
-
-<body>
-
-<script type="text/javascript" charset="utf-8" src="/ddr_overlays/static/js/ddr_overlays.js"></script>
-
-<script type="text/javascript" charset="utf-8">
-
-    var data_dependencies = [
-        'all_languages',
-        'language',
-        'pilot_data',
-        'result_data',
-        'race_status'
-    ];
-
-    rotorhazard.show_messages = false;
-    var result_data;
-    var streamclass = '{{ class_id }}';
-
-    var ddr_pilot_data;
-
-    function race_kickoff(msg) {
-        rotorhazard.timer.stopAll();
-
-        var staging_start_pi = (msg.pi_staging_at_s * 1000); // convert seconds (pi) to millis (JS)
-        var race_start_pi = (msg.pi_starts_at_s * 1000); // convert seconds (pi) to millis (JS)
-
-        rotorhazard.timer.race.hidden_staging = Boolean(msg.hide_stage_timer);
-        rotorhazard.timer.race.count_up = Boolean(msg.unlimited_time);
-        rotorhazard.timer.race.duration_tenths = msg.race_time_sec * 10;
-
-        rotorhazard.timer.race.start(race_start_pi, staging_start_pi);
+    <style>
+    @font-face {
+        font-weight: normal;
+        font-style: normal;
     }
 
-    $(document).ready(function () {
-        // get pi time
-        rotorhazard.pi_time_request = window.performance.now();
-        socket.emit('get_pi_time');
+    body {
+        margin: 0;
+        background-color: transparent;
+        color: white;
+    }
 
-        socket.on('language', default_handler['language']);
+    /* Header */
+    .event-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #1c1c1e;
+        padding: 2rem;
+        border-bottom: 4px solid #ff0000;
+    }
 
-        socket.on('race_scheduled', default_handler['race_scheduled']);
+    .event-header .logo {
+        height: 60px;
+    }
 
-        socket.on('pilot_data', function (msg) {
-            rotorhazard.event.pilot_attributes = msg.attributes;
-            rotorhazard.event.pilots = msg.pilots;
-            rotorhazard.options.pilotSort = msg.pilotSort;
-            ddr_pilot_data = msg.pilots;    
-        });
+    .event-header .title-block {
+        flex-grow: 1;
+        text-align: center;
+    }
 
-        socket.on('heartbeat', default_handler['heartbeat']);
+    .event-header .event-name {
+        font-size: 1.5rem;
+        color: #bbb;
+    }
 
-        socket.on('leaderboard', function (msg) {
-            var race = msg.current;
+    .event-header .final-ranking {
+        font-size: 3rem;
+        color: #fff;
+        margin-top: 0.3rem;
+        letter-spacing: 2px;
+    }
 
-            $('.curr_heat_title').html(race.displayname);
+    .main {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 2rem;
+        padding: 2rem;
+    }
 
-            leaderboard_type = race.leaderboard.meta.primary_leaderboard;
-            $('#nextup_pilot_box').empty();
-            build_nextup(race.leaderboard[leaderboard_type], 'current', race.leaderboard.meta, ddr_pilot_data);
-        });
+    /* Podium layout */
+    .podium {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1rem;
+        width: 100%;
+        max-width: 900px;
+        justify-items: center;
+        position: relative;
+        margin-bottom: 2rem;
+        margin-top: 47px;
+    }
 
-        socket.on('result_data', function (msg) {
-            result_data = msg;
-            
-            if (!$.isEmptyObject(msg.heats)) {
-                for (var class_id in msg.heats_by_class) {
-                    if (class_id == streamclass) {
-                        var current_class = msg.classes[class_id];
-                        if (current_class) {
-                            if (current_class.name) {
-                                class_name = current_class.name;
-                            } else {
-                                class_name = __('Class') + ' ' + current_class.id;
-                            }
-                            $('#header h1').html(class_name)
+    .podium-slot {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-                            if (current_class.ranking) {
-                                // ranking other than "From Race Format"
-                                $('#nextup_pilot_box').empty();
-                                build_nextup(current_class.ranking.ranking.slice(0, 3),
-                                             undefined,
-                                             undefined,
-                                             ddr_pilot_data,
-                                             true);
-                            } else if (current_class.leaderboard && current_class.leaderboard[current_class.leaderboard.meta.primary_leaderboard].length) {
-                                // ranking equal to "From Race Format"
-                                $('#nextup_pilot_box').empty();
-                                build_nextup(current_class.leaderboard[current_class.leaderboard.meta.primary_leaderboard].slice(0, 3),
-                                             undefined,
-                                             undefined,
-                                             ddr_pilot_data,
-                                             true);
+    .podium-slot.first { transform: translateY(0); z-index: 3; }
+    .podium-slot.second { transform: translateY(30px); z-index: 2; }
+    .podium-slot.third { transform: translateY(60px); z-index: 1; }
+
+    .position-label {
+        position: absolute;
+        top: -63px;
+        font-size: 4.5rem;
+        font-weight: bold;
+        letter-spacing: 1px;
+    }
+
+    .position-label.gold { color: gold; }
+    .position-label.silver { color: silver; }
+    .position-label.bronze { color: #cd7f32; }
+
+     .pilot-card {
+        background: #1a1a1d;
+        border-radius: 16px;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        border-top: 5px solid;
+        padding: 1rem;
+        animation: fadeUp 1s ease-out both;
+        opacity: 0;
+    }
+
+    .pilot-card.first {
+        border-color: gold;
+        animation-delay: 0.5s;
+    }
+
+    .pilot-card.second {
+        border-color: silver;
+        animation-delay: 0.7s;
+    }
+
+    .pilot-card.third {
+        border-color: #cd7f32;
+        animation-delay: 0.9s;
+    }
+
+    .pilot-card .pilot-img {
+        width: 100%;
+        max-height: 280px;
+        object-fit: contain;
+        object-position: center;
+        margin-bottom: 0.8rem;
+    }
+
+    .pilot-card .name {
+        font-size: 2rem;
+        margin-top: 0.5rem;
+        letter-spacing: 1px;
+    }
+
+    .team-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+        padding: 0 0.5rem;
+    }
+
+    .team-name {
+        font-size: 1.2rem;
+        color: #ccc;
+        text-align: left;
+    }
+
+    .team-logo {
+        height: 40px;
+        width: auto;
+    }
+
+    @keyframes fadeUp {
+        0% {
+            transform: translateY(100px);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .podium {
+            grid-template-columns: 1fr;
+        }
+
+        .podium-slot.first,
+        .podium-slot.second,
+        .podium-slot.third {
+            transform: none !important;
+        }
+
+        .position-label {
+            position: static;
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    .pilot-card .pilot-img {
+        width: 100%;
+        max-height: 280px;
+        object-fit: contain;
+        object-position: center;
+        margin-bottom: 0.8rem;
+    }
+
+    .pilot-card .name {
+        font-size: 2rem;
+        margin-top: 0.5rem;
+        letter-spacing: 1px;
+    }
+
+    .team-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+        padding: 0 0.5rem;
+    }
+
+    .team-name {
+        font-size: 1.2rem;
+        color: #ccc;
+        text-align: left;
+    }
+
+    .team-logo {
+        height: 40px;
+        width: auto;
+    }
+
+    /* Ranking list */
+    .ranking-list {
+        max-width: 500px;
+        flex-grow: 1;
+    }
+
+    .ranking-list h2 {
+        font-size: 2rem;
+        border-bottom: 2px solid #ff0000;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .ranking-list ol {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .ranking-list li {
+        background: #1a1a1d;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: 1.2rem;
+    }
+
+    .ranking-list li .position {
+        font-weight: bold;
+        color: #ff4c4c;
+        width: 30px;
+    }
+
+    .ranking-list li .name {
+        flex-grow: 1;
+    }
+
+    .ranking-list li img.avatar {
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .ranking-list li img.team-logo {
+        height: 32px;
+        width: auto;
+        margin-left: auto;
+    }
+
+    @media (max-width: 768px) {
+        .podium {
+            grid-template-columns: 1fr;
+            justify-items: center;
+        }
+
+        .pilot-card.first,
+        .pilot-card.second,
+        .pilot-card.third {
+            grid-column: auto;
+            transform: none !important;
+            animation-delay: 0s !important;
+        }
+
+        .main {
+            flex-direction: column;
+            align-items: center;
+        }
+    }
+    </style>
+</head>
+<body>
+
+    <script type="text/javascript" charset="utf-8" src="/ddr_overlays/static/js/ddr_overlays.js"></script>
+
+    <script type="text/javascript" charset="utf-8">
+
+        var data_dependencies = [
+            'all_languages',
+            'language',
+            'result_data',
+            'pilot_data'
+        ];
+
+        rotorhazard.show_messages = false;
+        var result_data;
+        var streamclass = '{{ class_id }}';
+
+        $(document).ready(function () {
+            if (!{{ class_id }}) {
+                socket.emit('load_data', {'load_types': [
+                    'current_heat',
+                ]});
+            }
+
+            socket.on('language', default_handler['language']);
+
+            socket.on('current_heat', function (msg) {
+                if (!{{ class_id }}) {
+                    if (msg.heat_class) {
+                        streamclass = msg.heat_class;
+                        if (result_data != undefined) {
+                            display_result_data(result_data);
+                        }
+                    } else {
+                        display_nothing()
+                    }
+                }
+            });
+
+            socket.on('pilot_data', function (msg) {
+                rotorhazard.event.pilot_attributes = msg.attributes;
+                rotorhazard.event.pilots = msg.pilots;
+                rotorhazard.options.pilotSort = msg.pilotSort;
+            });
+
+            function display_nothing() {
+                $('#header h1').html(__('No Data'))
+                $('#leaderboard').html('<p>' + __('There is no saved race data available to view.') + '</p>');
+            }
+
+            function display_result_data(msg) {
+                if (!$.isEmptyObject(msg.heats)) {
+                    for (var class_id in msg.heats_by_class) {
+                        if (class_id == streamclass) {
+                            var current_class = msg.classes[class_id];
+                            if (current_class) {
+                                if (current_class.name) {
+                                    class_name = current_class.name;
+                                } else {
+                                    class_name = __('Class') + ' ' + current_class.id;
+                                }
+                                $('#header h1').html(class_name)
+
+                                var leaderboard;
+                                /* filtro la leaderboard ai primi 16 o 32 piloti per le qualifiche, non funziona ancora con 64 piloti ma non importa */
+                                if (current_class.ranking) {
+                                    // ranking other than "From Race Format"
+                                    leaderboard = current_class.ranking.ranking;
+                                } else if (current_class.leaderboard && current_class.leaderboard[current_class.leaderboard.meta.primary_leaderboard].length) {
+                                    // ranking equal to "From Race Format"
+                                    leaderboard = current_class.leaderboard[current_class.leaderboard.meta.primary_leaderboard];
+                                }
+
+                                if (leaderboard) {
+                                    //assuming that the leaerboard is complete and filled
+                                    var first_pilot = leaderboard[0];
+                                    var second_pilot = leaderboard[1];
+                                    var third_pilot = leaderboard[2];
+                                    
+                                    $("#img-1").attr("src", getPilotImgURL(first_pilot));
+                                    $("#name-1").html(first_pilot.callsign);
+                                    $("#team-1").html(first_pilot.team_name || "-");
+                                    
+                                    $("#img-2").attr("src", getPilotImgURL(second_pilot));
+                                    $("#name-2").html(second_pilot.callsign);
+                                    $("#team-2").html(second_pilot.team_name || "-");
+                                    
+                                    $("#img-3").attr("src", getPilotImgURL(third_pilot));
+                                    $("#name-3").html(third_pilot.callsign);
+                                    $("#team-3").html(third_pilot.team_name || "-");
+                                    
+                                    $("#ranking-container").empty();
+                                    for (var i in leaderboard.slice(3)) {
+                                        var index = +i+3;
+                                        var current_pilot = leaderboard[index];
+                                        var position = leaderboard[index].position;
+                                        var pilotImg = getPilotImgURL(current_pilot);
+                                        var pilot_name = current_pilot.callsign;
+                                        var html = '<li><span class="position">' + position + '</span><img class="avatar" src="' + pilotImg + '"><span class="name">' + pilot_name + '</span></li>';
+                                        $("#ranking-container").append(html);
+                                    }
+                                } else {
+                                    display_nothing()
+                                }
                             }
                         }
                     }
+                } else {
+                    display_nothing()
                 }
             }
+
+            socket.on('result_data', function (msg) {
+                result_data = msg;
+                display_result_data(result_data);
+            });
         });
 
-        socket.on('prestage_ready', default_handler['prestage_ready']);
+    </script>
 
-        socket.on('stage_ready', default_handler['stage_ready']);
+  <!-- Header -->
+  <div class="event-header">
+    <img class="logo" src="/ddr_overlays/static/imgs/ddr_logo_white.png" alt="DDR Logo">
+    <div class="title-block">
+      <div class="event-name">{{ getOption('eventName') }}</div>
+      <div class="final-ranking">FINAL RANKING</div>
+    </div>
+    <div style="width: 60px;"></div>
+  </div>
 
-        socket.on('stop_timer', default_handler['stop_timer']);
-    });
-
-</script>
-
-<main class="page-stream">
-
-    <div id="ddr_nextup">
-
-        <div id="nextup_title">
-            Podium:
+  <div class="main">
+    <!-- Podio -->
+    <div class="podium">
+      <div class="podium-slot second">
+        <div class="position-label silver">2nd</div>
+        <div class="pilot-card second">
+          <img class="pilot-img" id="img-2" src="pilot2.png" alt="Pilot 2">
+          <div class="name" id="name-2">Pilot Bravo</div>
         </div>
+      </div>
 
-        <div id="title">
-            <span class="curr_heat_title"></span> - 
-            <span class="curr_event_name">{{ getOption('eventName') }}</span>
+      <div class="podium-slot first">
+         <div class="position-label gold">1st</div>
+        <div class="pilot-card first">
+          <img class="pilot-img" id="img-1" src="pilot1.png" alt="Pilot 1">
+          <div class="name" id="name-1">Pilot Alpha</div>
         </div>
+      </div>
 
-        <div id="nextup_pilot_box">
-
-            <div class="nextup_pilot">
-
-                <div class="nextup_pilot_avatar">
-                    <div class="nextup_pilot_avatar_mask">
-                        <img src="/ddr/static/imgs/no-avatar.webp" alt="Avatar">
-                    </div>
-                </div>
-
-                <div class="nextup_pilot_flag">
-                    <div class="nextup_pilot_flag_mask">
-                        <img src="/ddr/static/imgs/flags/nl.jpg">
-                    </div>
-                </div>
-
-                <div class="nextup_pilot_name">
-                    MCK FPV
-                </div>
-
-            </div>
-
+      <div class="podium-slot third">
+        <div class="position-label bronze">3rd</div>
+        <div class="pilot-card third">
+          <img class="pilot-img" id="img-3" src="pilot3.png" alt="Pilot 3">
+          <div class="name" id="name-3">Pilot Charlie</div>
         </div>
-
+      </div>
     </div>
 
-    <div id="race_lb">
-
-        <!--
-        <div class="race_lb_pilot">
-            <div class="pilot_flag">
-                <img src="http://localhost:5050/fpvscores/static/assets/imgs/flags/pl.jpg" alt="PL" height="32px">
-            </div>
-            <div class="pilot_pos">1.</div>
-            <div class="pilot_name">JesseFPV</div>
-            <div class="pilot_score">00:34.129</div>
-        </div>
-        -->
-
+    <!-- Classifica 4–16 -->
+    <div class="ranking-list">
+      <h2>Positions 4–16</h2>
+      <ol id="ranking-container">
+        <li><span class="position">4</span><img class="avatar" src="pilot4.png"><span class="name">Pilot Delta</span></li>
+        <li><span class="position">5</span><img class="avatar" src="pilot5.png"><span class="name">Pilot Echo</span></li>
+        <li><span class="position">6</span><img class="avatar" src="pilot6.png"><span class="name">Pilot Foxtrot</span></li>
+        <li><span class="position">7</span><img class="avatar" src="pilot7.png"><span class="name">Pilot Golf</span></li>
+        <li><span class="position">8</span><img class="avatar" src="pilot8.png"><span class="name">Pilot Hotel</span></li>
+        <li><span class="position">9</span><img class="avatar" src="pilot9.png"><span class="name">Pilot India</span></li>
+        <li><span class="position">10</span><img class="avatar" src="pilot10.png"><span class="name">Pilot Juliet</span></li>
+        <li><span class="position">11</span><img class="avatar" src="pilot11.png"><span class="name">Pilot Kilo</span></li>
+        <li><span class="position">12</span><img class="avatar" src="pilot12.png"><span class="name">Pilot Lima</span></li>
+        <li><span class="position">13</span><img class="avatar" src="pilot13.png"><span class="name">Pilot Mike</span></li>
+      </ol>
     </div>
-
-</div>
-
-</main>
+  </div>
 
 </body>
-
 </html>
