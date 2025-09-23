@@ -28,6 +28,8 @@ To setup country flags and pilot avatars refer to the **Important Information** 
 ### Pilot Avatars
 Pilot avatars are obtained from the `/rh-data/shared/avatars/` folder. The file name should be the pilot's callsign in lowercase where spaces has been replaced for underscores (_) and in the .jpg file type. The file should be a square image, preferably 256x256 or 512x612 pixels. If no avatar is found it will show the default avatar.
 
+The page with links to overlays gives the possibility to visualize and upload the pilot avatars directly from the browser without the need to manually copy them into the SD card. Avatars can be uploaded individually for each pilot or in one shot through a zip archive.
+
 ### Country Flags
 A country can be set as pilot attribute in the pilots tab (dropdown). When set it shows the flag icon before the pilot's callsign.
 

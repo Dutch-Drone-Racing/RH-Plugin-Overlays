@@ -14,6 +14,7 @@
     <script type="text/javascript" src="/static/svgasset.js"></script>
     <script type="text/javascript" src="/static/rh-ui.js"></script>
     <script type="text/javascript" src="/static/rotorhazard.js"></script>
+    <script type="text/javascript" charset="utf-8" src="/ddr_overlays/static/js/ddr_overlays.js"></script>
 
     <script>
         var data_dependencies = [
@@ -26,6 +27,7 @@
 
         rotorhazard.show_messages = false;
 
+        var ddr_pilot_data;
         var ddr_class_data;
 
         $(document).ready(function () {
@@ -33,6 +35,14 @@
                 if (msg.language) {
                     rotorhazard.interface_language = msg.language;
                 }
+            });
+
+            socket.on('pilot_data', function (msg) {
+                ddr_pilot_data = msg.pilots;
+
+                // sort by callsign
+                ddr_pilot_data.sort((a, b) => a.callsign.localeCompare(b.callsign));
+                renderPilots(ddr_pilot_data);
             });
 
             socket.on('class_data', function (msg) {
@@ -68,7 +78,101 @@
                     selectElement.value = selectedValue;
                 }
             });
+
+            $("#toggleHeader").on("click", function() {
+                $("#toggleContent").slideToggle(200);
+                $("#arrow").toggleClass("expanded");
+            });
+
+            // Quando clicco sul bottone, simulo il click sull'input nascosto
+            $(".upload-zip-btn").click(function() {
+                $("#zipInput").click();
+            });
+
+            // Quando scelgo un file ZIP
+            $("#zipInput").on("change", function() {
+                let file = this.files[0];
+                if (!file) return;
+
+                let formData = new FormData();
+                formData.append("zipfile", file);
+
+                $.ajax({
+                    url: "/upload_zip",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        console.log("Upload ok: ", response);
+                        renderPilots(ddr_pilot_data);
+                    },
+                    error: function(xhr) {
+                        alert("Error while uploading archive!");
+                        console.error(xhr.responseText);
+                    }
+                });
+            });
         });
+
+        function renderPilots(pilots) {
+            const $grid = $("#pilotsGrid");
+            $grid.empty();
+
+            pilots.forEach(pilot => {
+                const $div = $(`
+                    <div class="pilot" data-id="${pilot.id}">
+                        <img src="${getPilotImgURL(pilot)}" alt="${pilot.callsign}">
+                        <span>${pilot.callsign}</span>
+                        <button class="update-btn">Update avatar</button>
+                    </div>
+                `);
+
+                // "Update avatar" handling
+                $div.find(".update-btn").on("click", function() {
+                    const $img = $div.find("img");
+                    const pilotId = $div.data("id");
+                    const $input = $('<input type="file" accept="image/jpeg">');
+
+                    $input.on("change", function(e) {
+                        const file = e.target.files[0];
+                        if (file) {
+                            // Immediate preview
+                            const reader = new FileReader();
+                            reader.onload = function(ev) {
+                                $img.attr("src", ev.target.result);
+                            };
+                            reader.readAsDataURL(file);
+
+                            // Send to server (file name is modified to make sure it follows the naming convention)
+                            const newFile = new File([file], pilot.callsign.replace(/ /g,"_").toLowerCase() + ".jpg", { type: file.type });
+                            const formData = new FormData();
+                            formData.append("file", newFile);
+                            formData.append("pilot_id", pilot.id);
+
+                            $.ajax({
+                                url: "/upload_pilot_image",
+                                type: "POST",
+                                data: formData,
+                                processData: false,
+                                contentType: false,
+                                success: function(response) {
+                                    console.log("Upload ok: ", response);
+                                    renderPilots(ddr_pilot_data);
+                                },
+                                error: function(xhr) {
+                                    alert("Error while uploading image!");
+                                    console.error(xhr.responseText);
+                                }
+                            });
+                        }
+                    });
+                    $input.trigger("click");
+                });
+
+                $grid.append($div);
+            });
+        }
 
         function openDynamicLink(event, baseURL) {
             event.preventDefault();
@@ -82,6 +186,91 @@
 </head>
 
 <body>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .toggle-container {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            width: 90%;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .toggle-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            padding: 10px;
+            cursor: pointer;
+            background: #f5f5f5;
+        }
+
+        .toggle-header h2 {
+            margin: 0;
+            font-size: 16px;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .arrow {
+            margin-left: auto;
+            cursor: pointer;
+            transition: transform 0.3s;
+            display: inline-block;
+        }
+
+        .arrow.expanded {
+            transform: rotate(90deg);
+        }
+
+        .toggle-content {
+            display: none;
+            padding: 10px;
+        }
+
+        .pilots-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 15px;
+        }
+
+        .pilot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px;
+            background: #fafafa;
+        }
+
+        .pilot img {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #aaa;
+            margin-bottom: 6px;
+        }
+
+        .pilot span {
+            font-size: 14px;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+
+        .update-btn {
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+    </style>
 
     <header>
         <img src="/ddr_overlays/static/imgs/ddr_logo_white.png" alt="DDR Logo" height="48px"> 
@@ -98,8 +287,27 @@
 
         <br>
         <p style="max-width: 700px; margin: 0 auto;"><b>Pilot Avatars</b><br>
-            Pilot avatars are obtained from the /rh-data/shared/avatars/ folder. The file name should be the pilot's callsign in lowercase where spaces have been replaced for underscores (_) and in the .jpg file type. The file should be a square image, preferably 256x256 pixels. If no avatar is found, it will show the default avatar.
+            Pilot avatars are visible in the container below and can be uploaded individually with the dedicated button. They are obtained from the /rh-data/shared/avatars/ folder. The file name should be the pilot's callsign in lowercase where spaces have been replaced for underscores (_) and in the .jpg file type. The file should be a square image, preferably 256x256 pixels or 512x612 pixels. If no avatar is found, it will show the default avatar.
+            For a bulk update, store the image files in a zip archive and upload it with the button on top of the grid.
         </p>
+        <br>
+
+        <div class="toggle-container" style="max-width: 1400px; margin: 0 auto;">
+            <div class="toggle-header" id="toggleHeader">
+                <h2>Pilots</h2>
+                <span class="arrow" id="arrow">▶</span>
+            </div>
+            <div class="toggle-content" id="toggleContent">
+                <div class="zip-upload">
+                    <input type="file" id="zipInput" accept=".zip" style="display: none;">
+                    <button class="update-btn upload-zip-btn">Upload ZIP</button>
+                </div>
+
+                <div class="pilots-grid" id="pilotsGrid">
+                    <!-- Dynamically generated pilots -->
+                </div>
+            </div>
+        </div>
 
         <br>
         <p style="max-width: 700px; margin: 0 auto;"><b>Country Flags</b><br>

@@ -1,15 +1,17 @@
 '''DDR Overlays Plugin'''
 
-import logging
-logger = logging.getLogger(__name__)
-#import RHUtils
+import os
 import json
+import logging
+import requests
+import zipfile
 
 from RHUI import UIField, UIFieldType, UIFieldSelectOption
 
-import requests
-from flask import templating
+from flask import jsonify, request, templating
 from flask.blueprints import Blueprint
+
+logger = logging.getLogger(__name__)
 
 # Read the JSON file
 with open('plugins/ddr_overlays/static/data/countries.json', 'r') as file:
@@ -22,6 +24,10 @@ for country in countries_data:
     options.append(option)
 options.sort(key=lambda x: x.label)
 country_ui_field = UIField('country', "Country Code", UIFieldType.SELECT, options=options, value="")
+
+# Folder for pilot images
+PILOT_IMAGE_UPLOAD_FOLDER = 'shared/avatars'
+os.makedirs(PILOT_IMAGE_UPLOAD_FOLDER, exist_ok=True)
 
 def initialize(rhapi):
     rhapi.fields.register_pilot_attribute( country_ui_field )
@@ -96,6 +102,57 @@ def initialize(rhapi):
             )
         else:
             return False
+
+    ################################################
+
+    ### upload pilot image ###
+    @bp.route("/upload_pilot_image", methods=["POST"])
+    def upload_pilot_image():
+        if "file" not in request.files:
+            return jsonify({"error": "no file"}), 400
+
+        file = request.files["file"]
+        pilot_id = request.form.get("pilot_id", "unknown")
+
+        if file.filename == "":
+            return jsonify({"error": "empty filename"}), 400
+
+        filename = file.filename
+        filepath = os.path.join(PILOT_IMAGE_UPLOAD_FOLDER, filename)
+        file.save(filepath)
+
+        # public URL to get the image
+        file_url = filepath
+
+        return jsonify({"success": True, "new_url": file_url})
+
+    ### upload pilot image bulk ###
+    @bp.route("/upload_zip", methods=["POST"])
+    def upload_zip():
+        if "zipfile" not in request.files:
+            return jsonify({"error": "no file"}), 400
+
+        zip_file = request.files["zipfile"]
+
+        if zip_file.filename == "":
+            return jsonify({"error": "empty filename"}), 400
+
+        # temporary path
+        temp_path = os.path.join(PILOT_IMAGE_UPLOAD_FOLDER, "temp_upload.zip")
+        zip_file.save(temp_path)
+
+        # extraction
+        try:
+            with zipfile.ZipFile(temp_path, 'r') as zip_ref:
+                zip_ref.extractall(PILOT_IMAGE_UPLOAD_FOLDER)
+        except zipfile.BadZipFile:
+            os.remove(temp_path)
+            return jsonify({"error": "file is not a valid ZIP"}), 400
+
+        # remove the temporary archive
+        os.remove(temp_path)
+
+        return jsonify({"success": True, "message": "ZIP uploaded successfully"})
 
     rhapi.ui.blueprint_add(bp)
 
