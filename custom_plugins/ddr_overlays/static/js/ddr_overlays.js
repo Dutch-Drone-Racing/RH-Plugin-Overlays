@@ -138,21 +138,26 @@ default_handler = {
 
 /* Format-related functions */
 function get_number_of_pilots_from_format(bracket_type) {
+    var format_8 = ['ddr8de'];
+    if (format_8.includes(bracket_type)) {
+        return 8;
+    }
+
     var format_16 = ['multigp16', 'fai16', 'fai16de'];
     if (format_16.includes(bracket_type)) {
         return 16;
     }
-    
+
     var format_32 = ['fai32', 'fai32de'];
     if (format_32.includes(bracket_type)) {
         return 32;
     }
-    
+
     var format_64 = ['fai64', 'fai64de'];
     if (format_64.includes(bracket_type)) {
         return 64;
     }
-    
+
     return 999;
 }
 
@@ -430,36 +435,14 @@ function imageExists(image_url) {
 
 
 /* Functions for pilots */
-function render_pilots(rotorhazard) {
-    generate_pilot_attributes(rotorhazard);
-    for (var i = 0; i < rotorhazard.event.pilots.length; i++) {
-        pilot = rotorhazard.event.pilots[i];
-        country_flag = pilot.attributes.country.value.toLowerCase();
-        pilot_id = pilot.pilot_id;
+function render_pilots(ddr_pilot_data) {
+    count = Object.keys(ddr_pilot_data).length;
+    for (var i = 0; i < count; i++) {
+        let pilot = ddr_pilot_data[i];
 
         // if div exists
         if (document.getElementById('pilot_id_flag_' + pilot.pilot_id)) {
-            document.getElementById('pilot_id_flag_' + pilot.pilot_id).innerHTML = '<img class="country_flag" src="/ddr_overlays/static/imgs/flags/' + country_flag + '.jpg">';
-        }
-    }
-}
-
-function generate_pilot_attributes(rotorhazard) {
-    for (var i in rotorhazard.event.pilots) {
-        var pilot = rotorhazard.event.pilots[i];
-        if (pilot.pilot_id != 0) {
-            pilot.attributes = [];
-            for (var attr_idx in rotorhazard.event.pilot_attributes) {
-                var pilot_attr = rotorhazard.event.pilot_attributes[attr_idx];
-                if (pilot[pilot_attr.name] != undefined) {
-                    pilot_attr.value = pilot[pilot_attr.name];
-                } else {
-                    pilot_attr.value = '';
-                }
-                var pilot_attr_name = pilot_attr.name;
-                var attr_object = { name: pilot_attr_name, value: pilot_attr.value };
-                pilot.attributes[pilot_attr_name] = attr_object;
-            }
+            document.getElementById('pilot_id_flag_' + pilot.pilot_id).innerHTML = '<img class="country_flag" src="' + getFlagURL(pilot.pilot_id, ddr_pilot_data) + '">';
         }
     }
 }

@@ -55,6 +55,7 @@
         ];
 
         rotorhazard.show_messages = false;
+        var ddr_pilot_data;
         var result_data;
         var streamclass = '{{ class_id }}';
 
@@ -106,9 +107,7 @@
             });
 
             socket.on('pilot_data', function (msg) {
-                rotorhazard.event.pilot_attributes = msg.attributes;
-                rotorhazard.event.pilots = msg.pilots;
-                rotorhazard.options.pilotSort = msg.pilotSort;
+                ddr_pilot_data = msg.pilots;
             });
 
             function display_nothing() {
@@ -130,19 +129,19 @@
                                 $('#header h1').html(class_name)
 
                                 var leaderboard;
-                                /* filtro la leaderboard ai primi 16 o 32 piloti per le qualifiche, non funziona ancora con 64 piloti ma non importa */
+                                /* filtro la leaderboard ai primi 8, 16 o 32 piloti per le qualifiche, non funziona ancora con 64 piloti ma non importa */
                                 if (current_class.ranking) {
                                     // ranking other than "From Race Format"
                                     leaderboard = build_leaderboard(current_class.ranking.ranking,
                                                                     'by_race_time',
                                                                     undefined,
-                                                                    get_number_of_pilots_from_format( '{{ bracket_type }}' ) /* [16|32|64] */ );
+                                                                    get_number_of_pilots_from_format( '{{ bracket_type }}' ) /* [8|16|32|64] */ );
                                 } else if (current_class.leaderboard && current_class.leaderboard[current_class.leaderboard.meta.primary_leaderboard].length) {
                                     // ranking equal to "From Race Format"
                                     leaderboard = build_leaderboard(current_class.leaderboard[current_class.leaderboard.meta.primary_leaderboard],
                                                                     current_class.leaderboard.meta.primary_leaderboard,
                                                                     msg.meta,
-                                                                    get_number_of_pilots_from_format( '{{ bracket_type }}' ) /* [16|32|64] */ );
+                                                                    get_number_of_pilots_from_format( '{{ bracket_type }}' ) /* [8|16|32|64] */ );
                                 }
 
                                 if (leaderboard) {
@@ -177,7 +176,7 @@
                                         $('#leaderboard_fai_p' + j).remove();
                                     }
 
-                                    render_pilots(rotorhazard);
+                                    render_pilots(ddr_pilot_data);
 
                                     // Start carousel
                                     carousel();
