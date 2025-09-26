@@ -108,8 +108,7 @@
                         renderPilots(ddr_pilot_data);
                     },
                     error: function(xhr) {
-                        alert("Error while uploading archive!");
-                        console.error(xhr.responseText);
+                        alert("Error: " + xhr.responseJSON.error);
                     }
                 });
             });
@@ -161,8 +160,7 @@
                                     renderPilots(ddr_pilot_data);
                                 },
                                 error: function(xhr) {
-                                    alert("Error while uploading image!");
-                                    console.error(xhr.responseText);
+                                    alert("Error: " + xhr.responseJSON.error);
                                 }
                             });
                         }
