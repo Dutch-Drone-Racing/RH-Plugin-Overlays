@@ -166,12 +166,11 @@
                 build_nextup(race.leaderboard[leaderboard_type], 'current', race.leaderboard.meta, ddr_pilot_data, true);
 
                 var bracket_format_info = bracket_formats[race_bracket_type];
-
-                let is_winner_bracket = (bracket_format_info[heat_index].type == "winner") || (bracket_format_info[heat_index].type == "preliminary");
-                let is_final_heat = (heat_number >= bracket_format_info[bracket_format_info.length-1].number);
+                let is_winner_bracket = bracket_format_info && ((bracket_format_info[heat_index].type == "winner") || (bracket_format_info[heat_index].type == "preliminary"));
+                let is_final_heat = bracket_format_info && ((heat_number >= bracket_format_info[bracket_format_info.length-1].number));
 
                 // the result is nicely placed for heats with four pilots
-                if (is_final_heat) {
+                if (is_final_heat || !bracket_format_info) {
                     $('#winner-cell').empty();
                     $('#lower-cell').empty();
                 } else {
