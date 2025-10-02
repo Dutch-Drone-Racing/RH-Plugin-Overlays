@@ -118,11 +118,13 @@
             }
 
             var heat_number = 0;
+            var number_of_heats = 0;
             if (ddr_race_data != undefined) {
                 // reason for this: race.heat counts heats of every class (as a global counter),
                 // we need the heat number with respect to its class
                 for (let class_id in ddr_race_data.heats_by_class) {
                     heat_number = ddr_race_data.heats_by_class[class_id].indexOf(race.heat) + 1;
+                    number_of_heats = ddr_race_data.heats_by_class[class_id].length;
                     if (heat_number != 0) {
                         // class found, save data
                         race_class_id = class_id;
@@ -141,6 +143,7 @@
                     .filter(h => h.class_id == current_heat.class_id)
                     .map(h => h.id);
                 heat_number = heats_by_current_class.indexOf(race.heat) + 1;
+                number_of_heats = heats_by_current_class.length;
                 if (heat_number != 0) {
                     // class found, save data
                     race_class_id = current_heat.class_id;
@@ -154,7 +157,7 @@
 
             if (heat_number != 0) {
                 console.log("Found class id " + race_class_id + " (" + race_class_name + ")");
-                console.log("Found heat number " + heat_number);
+                console.log("Found heat number " + heat_number + " out of " + number_of_heats + " heats");
 
                 let heat_index = heat_number-1;
 
@@ -171,6 +174,7 @@
 
                 // the result is nicely placed for heats with four pilots
                 if (is_final_heat || !bracket_format_info) {
+                    // when in final of elimination brackets or bracket type is not defined ('none') don't show anything
                     $('#winner-cell').empty();
                     $('#lower-cell').empty();
                 } else {
